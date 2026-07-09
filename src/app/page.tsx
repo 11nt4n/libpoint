@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-import { ArrowRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -14,9 +14,6 @@ export default function Home() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // Login Modal State
-  const [showLogin, setShowLogin] = useState(false);
 
   // Register Modal State
   const [showRegister, setShowRegister] = useState(false);
