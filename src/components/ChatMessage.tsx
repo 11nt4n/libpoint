@@ -13,19 +13,27 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   if (role === 'system' || role === 'data') return null;
 
   return (
-    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-6`}>
-      <div className={`flex max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'} gap-4`}>
-        {/* Avatar */}
-        <div className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${isUser ? 'bg-primary' : 'bg-gray-800'}`}>
-          {isUser ? <User className="text-white h-5 w-5" /> : <Bot className="text-white h-5 w-5" />}
-        </div>
+    <div className={`flex w-full mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex max-w-[85%] sm:max-w-[75%] gap-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+        {/* Avatar for Assistant only (ChatGPT style) */}
+        {!isUser && (
+          <div className="flex-shrink-0 h-8 w-8 rounded-full border border-gray-200 flex items-center justify-center bg-white">
+            <Bot className="text-gray-900 h-5 w-5" />
+          </div>
+        )}
         
         {/* Message Content */}
-        <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-          <div className="text-sm text-gray-500 mb-1">{isUser ? 'Anda' : 'LibPoint AI (Qwen)'}</div>
-          <div className={`p-4 rounded-2xl ${isUser ? 'bg-primary/10 text-primary-900 rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none'} prose prose-sm max-w-none`}>
-            <ReactMarkdown>{content}</ReactMarkdown>
-          </div>
+        <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-full`}>
+          {isUser ? (
+            <div className="px-5 py-3 rounded-[24px] bg-gray-100 text-gray-900 text-[15px] leading-relaxed">
+              <ReactMarkdown className="prose prose-sm max-w-none break-words">{content}</ReactMarkdown>
+            </div>
+          ) : (
+            <div className="py-1 text-gray-900 text-[15px] leading-relaxed w-full">
+              <div className="font-semibold text-gray-900 mb-1">LibPoint AI</div>
+              <ReactMarkdown className="prose prose-sm max-w-none break-words">{content}</ReactMarkdown>
+            </div>
+          )}
         </div>
       </div>
     </div>

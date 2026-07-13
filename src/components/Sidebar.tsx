@@ -49,8 +49,7 @@ export default function Sidebar({ role }: SidebarProps) {
     }
   };
 
-  const adminMenus: Menu[] = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  const adminFeatures: Menu[] = [
     { name: 'Data Buku', href: '/admin/books', icon: Book },
     { name: 'Peminjaman', href: '/admin/loans', icon: CheckSquare },
     { name: 'Anggota', href: '/admin/members', icon: Users },
@@ -60,7 +59,7 @@ export default function Sidebar({ role }: SidebarProps) {
   ];
 
   const userMenus: Menu[] = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Dashboard', href: role === 'admin' ? '/admin' : '/dashboard', icon: LayoutDashboard },
     { 
       name: 'Sirkulasi Buku', 
       href: '/dashboard/books', 
@@ -78,7 +77,72 @@ export default function Sidebar({ role }: SidebarProps) {
     { name: 'AI Assistant', href: '/dashboard/chat', icon: MessageSquare },
   ];
 
-  const menus = role === 'admin' ? adminMenus : userMenus;
+  const renderMenu = (menu: Menu) => {
+    const isDashboard = menu.href === '/admin' || menu.href === '/dashboard';
+    const isExactActive = pathname === menu.href;
+    const isChildActive = menu.submenu?.some(sub => pathname === sub.href);
+    const isActive = isDashboard ? isExactActive : (pathname.startsWith(menu.href) || isChildActive);
+    
+    const Icon = menu.icon;
+    const isExpanded = expandedMenu === menu.name || (isActive && expandedMenu !== false && menu.submenu);
+
+    return (
+      <div key={menu.href} className="flex flex-col gap-1">
+        {menu.submenu ? (
+          <button
+            onClick={() => setExpandedMenu(isExpanded ? null : menu.name)}
+            className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+              isActive
+                ? 'bg-primary/10 text-primary font-semibold'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gray-400'}`} />
+              <span className="text-sm">{menu.name}</span>
+            </div>
+            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+        ) : (
+          <Link
+            href={menu.href}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+              isActive
+                ? 'bg-primary/10 text-primary font-semibold'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+            }`}
+          >
+            <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gray-400'}`} />
+            <span className="text-sm">{menu.name}</span>
+          </Link>
+        )}
+
+        {/* Submenu rendering */}
+        {menu.submenu && isExpanded && (
+          <div className="ml-9 flex flex-col gap-1 mt-1 border-l-2 border-gray-100 pl-2">
+            {menu.submenu.map((sub) => {
+              const isSubActive = pathname === sub.href;
+              const SubIcon = sub.icon;
+              return (
+                <Link
+                  key={sub.href}
+                  href={sub.href}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                    isSubActive
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 text-sm'
+                  }`}
+                >
+                  <SubIcon className={`w-4 h-4 ${isSubActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <span className="text-sm">{sub.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 shadow-sm">
@@ -94,73 +158,18 @@ export default function Sidebar({ role }: SidebarProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 scrollbar-hide">
-        {menus.map((menu) => {
-          const isDashboard = menu.href === '/admin' || menu.href === '/dashboard';
-          // Check if parent or any child is active
-          const isExactActive = pathname === menu.href;
-          const isChildActive = menu.submenu?.some(sub => pathname === sub.href);
-          const isActive = isDashboard ? isExactActive : (pathname.startsWith(menu.href) || isChildActive);
-          
-          const Icon = menu.icon;
-          const isExpanded = expandedMenu === menu.name || (isActive && expandedMenu !== false && menu.submenu);
+        {userMenus.map(renderMenu)}
 
-          return (
-            <div key={menu.href} className="flex flex-col gap-1">
-              {menu.submenu ? (
-                <button
-                  onClick={() => setExpandedMenu(isExpanded ? null : menu.name)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
-                    isActive
-                      ? 'bg-primary/10 text-primary font-semibold'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gray-400'}`} />
-                    <span className="text-sm">{menu.name}</span>
-                  </div>
-                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                </button>
-              ) : (
-                <Link
-                  href={menu.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
-                    isActive
-                      ? 'bg-primary/10 text-primary font-semibold'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gray-400'}`} />
-                  <span className="text-sm">{menu.name}</span>
-                </Link>
-              )}
-
-              {/* Submenu rendering */}
-              {menu.submenu && isExpanded && (
-                <div className="ml-9 flex flex-col gap-1 mt-1 border-l-2 border-gray-100 pl-2">
-                  {menu.submenu.map((sub) => {
-                    const isSubActive = pathname === sub.href;
-                    const SubIcon = sub.icon;
-                    return (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                          isSubActive
-                            ? 'bg-blue-50 text-blue-700 font-medium'
-                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 text-sm'
-                        }`}
-                      >
-                        <SubIcon className={`w-4 h-4 ${isSubActive ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-sm">{sub.name}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+        {role === 'admin' && (
+          <div className="pt-4 mt-4 border-t border-gray-100">
+            <div className="px-3 mb-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                Fitur Admin
+              </span>
             </div>
-          );
-        })}
+            {adminFeatures.map(renderMenu)}
+          </div>
+        )}
       </div>
 
       <div className="p-4 border-t border-gray-200">
@@ -175,3 +184,4 @@ export default function Sidebar({ role }: SidebarProps) {
     </aside>
   );
 }
+

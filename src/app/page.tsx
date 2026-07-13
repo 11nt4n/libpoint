@@ -52,11 +52,7 @@ export default function Home() {
           .eq('user_id', data.user.id)
           .single();
 
-        if (profile?.role === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/dashboard');
-        }
+        router.push('/dashboard');
       }
     } catch (err: any) {
       setError('Terjadi kesalahan saat login.');

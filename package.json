@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.9",
+    "@ai-sdk/react": "^4.0.19",
     "@supabase/supabase-js": "^2.110.0",
     "ai": "^7.0.18",
     "lucide-react": "^1.23.0",
@@ -20,12 +21,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

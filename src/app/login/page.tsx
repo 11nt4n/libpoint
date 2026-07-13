@@ -37,11 +37,7 @@ export default function LoginPage() {
           .eq('id', data.user.id)
           .single();
 
-        if (profile?.role === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/dashboard');
-        }
+        router.push('/dashboard');
       }
     } catch (err: any) {
       setError('Terjadi kesalahan saat login.');
