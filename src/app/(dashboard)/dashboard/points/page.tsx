@@ -28,7 +28,8 @@ export default function PointsPage() {
         setUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Pengguna');
         setAvatarUrl(session.user.user_metadata?.avatar_url || '');
         
-        const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        const { getEncryptedProfile } = await import('@/app/actions/profiles');
+        const { data } = await getEncryptedProfile(session.user.id);
         if (data) {
           setTotalPoints(data.total_points || 0);
           setUserName(data.nama_panggilan || data.full_name || data.nama_lengkap || 'Pengguna');

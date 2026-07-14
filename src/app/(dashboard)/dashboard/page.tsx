@@ -210,6 +210,16 @@ function ImageCarousel() {
   );
 }
 
+const PlusPattern = ({ className = "" }: { className?: string }) => (
+  <svg className={`absolute pointer-events-none opacity-40 ${className}`} width="168" height="264" fill="none" viewBox="0 0 168 264">
+    <pattern id="plus-pattern" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M12 6v12M6 12h12" stroke="#10b981" strokeWidth="3" strokeLinecap="round"/>
+    </pattern>
+    <rect width="100%" height="100%" fill="url(#plus-pattern)" />
+  </svg>
+);
+
+
 export default function UserDashboard() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [level, setLevel] = useState(1);
@@ -244,117 +254,131 @@ export default function UserDashboard() {
   return (
     <div className="space-y-12 pb-12 font-sans">
       {/* FIRST SCREEN WRAPPER */}
-      <div className="-mt-8 -mx-8 px-8 md:px-12 pt-32 pb-16 min-h-[calc(100vh-5rem)] flex flex-col justify-between gap-12 bg-gradient-to-b from-white/0 to-slate-50/50">
+      <div className="relative -mt-8 -mx-8 px-8 md:px-12 pt-32 pb-16 min-h-[calc(100vh-5rem)] flex flex-col justify-between gap-12 overflow-hidden">
         
-        {/* HEADER BANNER SECTION */}
-        <div className="flex-1 bg-transparent flex flex-col-reverse md:flex-row items-center justify-between gap-8 relative">
-          <div className="md:w-3/5 relative z-10 space-y-6">
-          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-[#0B2C4A]">
-            Tahun Ajaran Baru<br/>
-            Jangan Sampai <span className="text-primary drop-shadow-[0_0_20px_rgba(31,144,144,0.4)]">Tersesat!</span>
-          </h1>
-          
-          <p className="text-slate-500 text-lg max-w-xl leading-relaxed font-medium">
-            Jadikan Perpustakaan sebagai penyelamat belajarmu. Bikin belajar jadi paham dan buktikan keseruannya bersama koleksi buku terbaik kami.
-          </p>
-          
-          <div className="text-primary font-bold text-lg drop-shadow-[0_0_15px_rgba(31,144,144,0.4)]">
-            #PerpustakaanBisaBanget
-          </div>
+        {/* Background Image bg1.png */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <img src="/bg1.png" alt="Background" className="w-full h-full object-cover object-center" />
         </div>
-        
-        <div className="md:w-2/5 flex justify-center relative z-10">
-          <div className="relative animate-float mt-8 md:mt-0">
-            {/* Glow behind the mascot */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-teal-400/30 blur-3xl rounded-full scale-125"></div>
-            <img 
-              src="/maskot.png" 
-              alt="Welcome Mascot" 
-              className="w-full max-w-[450px] object-contain relative z-10 drop-shadow-[0_20px_35px_rgba(31,144,144,0.3)] hover:scale-105 transition-transform duration-500"
-            />
-          </div>
+
+        {/* HEADER BANNER SECTION */}
+        <div className="flex-1 flex flex-col items-center justify-start text-center relative z-10 space-y-6 w-full max-w-4xl mx-auto pt-8 md:pt-16 pb-20">
+          <PopUp delay={0}>
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-[#0B2C4A]">
+              Jelajahi Dunia Pengetahuan<br/>
+              Tanpa Batas <span className="text-primary">Waktu!</span>
+            </h1>
+          </PopUp>
+          
+          <PopUp delay={150}>
+            <p className="text-slate-800 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
+              Tingkatkan pengalaman belajarmu dengan Perpustakaan Digital. Akses ribuan koleksi e-book, jurnal, dan pustaka ilmiah secara instan, di mana saja dan kapan saja.
+            </p>
+          </PopUp>
+          
+          <PopUp delay={300}>
+            <div className="mt-4 text-primary font-bold text-xl bg-white/80 backdrop-blur-sm px-8 py-3 rounded-full border border-primary/20 inline-block shadow-sm">
+              #PerpustakaanBisaBanget
+            </div>
+          </PopUp>
         </div>
       </div>
 
-        {/* VISI MISI SECTION */}
-        <section className="relative z-20 w-full shrink-0">
-          <div className="grid lg:grid-cols-5 gap-8">
-          {/* Visi */}
-          <div className="lg:col-span-2 group bg-gradient-to-br from-teal-900 via-teal-800 to-primary rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-teal-900/20 text-center transform hover:-translate-y-2 transition-all duration-500 relative overflow-hidden flex flex-col justify-center border border-white/10">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors duration-500 pointer-events-none"></div>
+      {/* VISI MISI SECTION */}
+      <section className="relative z-20 w-full shrink-0 mb-20 overflow-hidden lg:overflow-visible">
+        {/* Decorative Patterns */}
+        <PlusPattern className="-top-10 -left-10 md:left-0 opacity-30" />
+        <PlusPattern className="top-32 md:top-48 -right-10 md:right-0 opacity-30" />
+        
+        <div className="relative px-4 md:px-12 max-w-7xl mx-auto">
+          <div className="relative z-10 grid lg:grid-cols-2 gap-10 lg:gap-8">
             
-            <h2 className="text-3xl font-black text-white mb-6 relative z-10 tracking-wide drop-shadow-md">VISI KAMI</h2>
-            <p className="text-teal-50 leading-relaxed font-semibold relative z-10 text-lg md:text-xl">
-              "Menjadi perpustakaan yang pintar, profesional dan unggul sebagai pusat penyedia informasi ilmiah di bidang keamanan siber dan kriptografi tingkat nasional."
-            </p>
-          </div>
-
-          {/* Misi */}
-          <div className="lg:col-span-3 group bg-gradient-to-br from-teal-900 via-teal-800 to-primary rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-teal-900/20 transform hover:-translate-y-2 transition-all duration-500 relative overflow-hidden flex flex-col justify-center border border-white/10">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors duration-500 pointer-events-none"></div>
-            
-            <h2 className="text-3xl font-black text-white mb-8 relative z-10 tracking-wide drop-shadow-md text-center">MISI KAMI</h2>
-            
-            <ul className="text-teal-50 font-medium relative z-10 text-base md:text-lg space-y-4">
-              <li className="group/li text-center">
-                <span className="text-yellow-400 font-bold mr-2 group-hover/li:scale-125 transition-transform inline-block">1.</span>
-                <span className="leading-relaxed">Memfasilitasi sivitas akademika Poltek SSN dalam melaksanakan pendidikan, penelitian, dan pengabdian kepada masyarakat yang berkualitas dan berkelanjutan;</span>
-              </li>
-              <li className="group/li text-center">
-                <span className="text-yellow-400 font-bold mr-2 group-hover/li:scale-125 transition-transform inline-block">2.</span>
-                <span className="leading-relaxed">Menyediakan layanan informasi ilmiah di bidang keamanan siber dan kriptografi yang menjadi rujukan nasional;</span>
-              </li>
-              <li className="group/li text-center">
-                <span className="text-yellow-400 font-bold mr-2 group-hover/li:scale-125 transition-transform inline-block">3.</span>
-                <span className="leading-relaxed">Menyelenggarakan tata kelola perpustakaan sesuai standar nasional perpustakaan perguruan tinggi yang unggul.</span>
-              </li>
-            </ul>
-          </div>
+            {/* VISI (Left Column) */}
+            <div className="flex flex-col items-center">
+              <PopUp delay={0}>
+                <div className="mb-6 flex justify-center w-full">
+                  <img src="/visi.png" alt="VISI KAMI" className="h-16 md:h-24 w-auto object-contain" />
+                </div>
+              </PopUp>
+              <PopUp delay={150}>
+                <p className="text-slate-600 leading-relaxed text-base md:text-lg font-medium text-justify">
+                  &quot;Menjadi perpustakaan yang <strong className="text-[#0B2C4A] font-bold">pintar, profesional dan unggul</strong> sebagai pusat penyedia <strong className="text-[#0B2C4A] font-bold">informasi ilmiah</strong> di bidang <strong className="text-primary font-black">keamanan siber dan kriptografi</strong> tingkat nasional.&quot;
+                </p>
+              </PopUp>
             </div>
-          </section>
+
+            {/* MISI (Right Column) */}
+            <div className="flex flex-col items-center">
+              <PopUp delay={200}>
+                <div className="mb-6 flex justify-center w-full">
+                  <img src="/misi.png" alt="MISI KAMI" className="h-16 md:h-24 w-auto object-contain" />
+                </div>
+              </PopUp>
+              <ul className="text-slate-600 font-medium text-base md:text-lg space-y-3">
+                <PopUp delay={350}>
+                  <li className="flex items-start gap-4">
+                    <span className="text-primary font-black text-xl shrink-0">1.</span>
+                    <span className="leading-relaxed text-justify">Memfasilitasi sivitas akademika Poltek SSN dalam melaksanakan <strong className="text-[#0B2C4A] font-bold">pendidikan, penelitian, dan pengabdian kepada masyarakat</strong> yang <strong className="text-primary font-black">berkualitas dan berkelanjutan</strong>;</span>
+                  </li>
+                </PopUp>
+                <PopUp delay={500}>
+                  <li className="flex items-start gap-4">
+                    <span className="text-primary font-black text-xl shrink-0">2.</span>
+                    <span className="leading-relaxed text-justify">Menyediakan <strong className="text-[#0B2C4A] font-bold">layanan informasi ilmiah</strong> di bidang <strong className="text-primary font-black">keamanan siber dan kriptografi</strong> yang menjadi <strong className="text-[#0B2C4A] font-bold">rujukan nasional</strong>;</span>
+                  </li>
+                </PopUp>
+                <PopUp delay={650}>
+                  <li className="flex items-start gap-4">
+                    <span className="text-primary font-black text-xl shrink-0">3.</span>
+                    <span className="leading-relaxed text-justify">Menyelenggarakan <strong className="text-[#0B2C4A] font-bold">tata kelola perpustakaan</strong> sesuai <strong className="text-primary font-black">standar nasional</strong> perpustakaan perguruan tinggi yang <strong className="text-[#0B2C4A] font-bold">unggul</strong>.</span>
+                  </li>
+                </PopUp>
+              </ul>
+            </div>
+
+          </div>
         </div>
+      </section>
 
       {/* SEJARAH SECTION */}
-      <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-lg shadow-slate-200/50 border border-slate-100">
+      <section className="bg-gradient-to-r from-teal-500 to-primary w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] py-16 px-4 md:px-12 shadow-lg mt-32 mb-20">
         <PopUp>
-          <h3 className="text-3xl font-extrabold text-[#0B2C4A] mb-16 text-center">Sejarah Perpustakaan</h3>
+          <h3 className="text-3xl font-extrabold text-white mb-16 text-center drop-shadow-md">Sejarah Perpustakaan</h3>
         </PopUp>
         
         {/* History Grid */}
-        <div className="relative">
+        <div className="relative max-w-7xl mx-auto">
           {/* Connecting Dashed Line */}
-          <div className="hidden md:block absolute top-[11px] left-[16.6%] right-[16.6%] h-0 border-t-[3px] border-dashed border-slate-200 z-0"></div>
+          <div className="hidden md:block absolute top-[11px] left-[16.6%] right-[16.6%] h-0 border-t-[3px] border-dashed border-white/40 z-0"></div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 relative z-10">
             {/* Item 1 */}
             <PopUp delay={0}>
               <div className="flex flex-col items-center text-center group">
-                <div className="w-6 h-6 rounded-full bg-white border-[5px] border-[#38BDF8] shadow-sm mb-6 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(56,189,248,0.5)] transition-all duration-300 z-10"></div>
-                <h2 className="text-5xl font-black text-[#38BDF8] mb-2 tracking-tight group-hover:-translate-y-1 transition-transform">1975</h2>
-                <h4 className="text-lg font-bold text-[#38BDF8] mb-3">Perpustakaan ASN</h4>
-                <p className="text-slate-600 text-sm leading-relaxed font-medium">Berdiri sebagai langkah awal penyediaan literasi untuk institusi persandian negara.</p>
+                <div className="w-6 h-6 rounded-full bg-white border-[5px] border-teal-200 shadow-sm mb-6 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-300 z-10"></div>
+                <h2 className="text-5xl font-black text-white mb-2 tracking-tight group-hover:-translate-y-1 transition-transform drop-shadow-md">1975</h2>
+                <h4 className="text-lg font-bold text-teal-50 mb-3">Perpustakaan ASN</h4>
+                <p className="text-white/90 text-sm leading-relaxed font-medium">Berdiri sebagai langkah awal penyediaan literasi untuk institusi persandian negara.</p>
               </div>
             </PopUp>
 
             {/* Item 2 */}
             <PopUp delay={150}>
               <div className="flex flex-col items-center text-center group">
-                <div className="w-6 h-6 rounded-full bg-white border-[5px] border-[#C084FC] shadow-sm mb-6 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(192,132,252,0.5)] transition-all duration-300 z-10"></div>
-                <h2 className="text-5xl font-black text-[#C084FC] mb-2 tracking-tight group-hover:-translate-y-1 transition-transform">2004</h2>
-                <h4 className="text-lg font-bold text-[#C084FC] mb-3">Perpustakaan STSN</h4>
-                <p className="text-slate-600 text-sm leading-relaxed font-medium">Berubah seiring pembentukan Sekolah Tinggi Sandi Negara (Keputusan Lemsaneg No. OT.101/KEP.77.A/2004).</p>
+                <div className="w-6 h-6 rounded-full bg-white border-[5px] border-teal-200 shadow-sm mb-6 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-300 z-10"></div>
+                <h2 className="text-5xl font-black text-white mb-2 tracking-tight group-hover:-translate-y-1 transition-transform drop-shadow-md">2004</h2>
+                <h4 className="text-lg font-bold text-teal-50 mb-3">Perpustakaan STSN</h4>
+                <p className="text-white/90 text-sm leading-relaxed font-medium">Berubah seiring pembentukan Sekolah Tinggi Sandi Negara (Keputusan Lemsaneg No. OT.101/KEP.77.A/2004).</p>
               </div>
             </PopUp>
 
             {/* Item 3 */}
             <PopUp delay={300}>
               <div className="flex flex-col items-center text-center group">
-                <div className="w-6 h-6 rounded-full bg-white border-[5px] border-[#4ADE80] shadow-sm mb-6 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(74,222,128,0.5)] transition-all duration-300 z-10"></div>
-                <h2 className="text-5xl font-black text-[#4ADE80] mb-2 tracking-tight group-hover:-translate-y-1 transition-transform">2019</h2>
-                <h4 className="text-lg font-bold text-[#4ADE80] mb-3">Perpustakaan Poltek SSN</h4>
-                <p className="text-slate-600 text-sm leading-relaxed font-medium">Bertransformasi menjadi Politeknik Siber dan Sandi Negara (Peraturan BSSN no. 12/2019).</p>
+                <div className="w-6 h-6 rounded-full bg-white border-[5px] border-teal-200 shadow-sm mb-6 group-hover:scale-150 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-300 z-10"></div>
+                <h2 className="text-5xl font-black text-white mb-2 tracking-tight group-hover:-translate-y-1 transition-transform drop-shadow-md">2019</h2>
+                <h4 className="text-lg font-bold text-teal-50 mb-3">Perpustakaan Poltek SSN</h4>
+                <p className="text-white/90 text-sm leading-relaxed font-medium">Bertransformasi menjadi Politeknik Siber dan Sandi Negara (Peraturan BSSN no. 12/2019).</p>
               </div>
             </PopUp>
           </div>

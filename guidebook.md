@@ -1,71 +1,97 @@
 # Guidebook LibPoint
 
-Selamat datang di panduan instalasi dan penggunaan aplikasi **LibPoint**. Aplikasi ini adalah prototipe web modern untuk sistem informasi perpustakaan dengan antarmuka bergaya premium (Tailwind CSS & Glassmorphism).
-
-## Persyaratan Sistem (Prerequisites)
-
-Sebelum menjalankan aplikasi, pastikan sistem Anda telah memiliki:
-
-1. **Web Server & Database**: Disarankan menggunakan [XAMPP](https://www.apachefriends.org/index.html) (sudah termasuk Apache dan MySQL/MariaDB).
-2. **PHP**: Versi 7.4 atau lebih baru.
-3. **Composer**: Dependency Manager untuk PHP. Bisa diunduh di [getcomposer.org](https://getcomposer.org/).
-
-## Langkah-Langkah Instalasi & Menjalankan Aplikasi
-
-### 1. Persiapan Database (Lokal / MySQL)
-Aplikasi ini secara bawaan (default) menggunakan database MySQL bernama `db_libpoint_v2`.
-- Buka aplikasi XAMPP dan jalankan modul **Apache** serta **MySQL**.
-- Buka browser dan akses [http://localhost/phpmyadmin](http://localhost/phpmyadmin).
-- Buat database baru dengan nama `db_libpoint_v2`.
-- Import file SQL database Anda ke dalam database `db_libpoint_v2` yang baru saja dibuat.
-
-### 2. Konfigurasi Kredensial (.env)
-Aplikasi ini sekarang menggunakan sistem *environment variables* untuk mengelola kredensial database dengan aman.
-- Cari file `.env.example` di dalam direktori `libpoint`.
-- *Copy/Paste* file tersebut dan ubah namanya menjadi tepat **`.env`**.
-- Buka file `.env` tersebut dan sesuaikan isinya jika password MySQL Anda berbeda:
-  ```env
-  DB_HOST=localhost
-  DB_USER=root
-  DB_PASS=password_anda
-  DB_NAME=db_libpoint_v2
-  ```
-
-### 3. Instalasi Dependency (Composer)
-Aplikasi ini menggunakan Composer untuk library eksternal (seperti DomPDF).
-Buka terminal (Command Prompt/PowerShell) dan arahkan ke folder proyek ini (`d:\4. Lomba\libpoint`), kemudian jalankan perintah:
-```bash
-composer install
-```
-Perintah ini akan membaca file `composer.json` dan mengunduh library ke dalam folder `vendor/`.
-
-### 4. Menjalankan Aplikasi
-Anda dapat menjalankan aplikasi dengan 2 cara:
-
-#### Opsi A: Menggunakan XAMPP (Apache)
-Pindahkan seluruh folder `libpoint` ini ke dalam direktori `htdocs` pada instalasi XAMPP Anda (misalnya `C:\xampp\htdocs\libpoint`).
-Kemudian akses di browser:
-[http://localhost/libpoint](http://localhost/libpoint)
-
-#### Opsi B: Menggunakan PHP Built-in Server
-Jika PHP sudah terdaftar di Environment Variables sistem Anda, buka terminal di folder proyek ini (`d:\4. Lomba\libpoint`) dan jalankan:
-```bash
-php -S localhost:8000
-```
-Buka browser dan akses:
-[http://localhost:8000](http://localhost:8000)
+Selamat datang di panduan resmi aplikasi **LibPoint**. Aplikasi ini adalah platform web modern untuk sistem informasi perpustakaan yang dibangun menggunakan **Next.js**, **Tailwind CSS**, dan **Supabase**. Aplikasi ini dirancang dengan antarmuka bergaya premium (Glassmorphism) dan dilengkapi dengan berbagai fitur modern.
 
 ---
 
-## Opsi Lanjutan: Integrasi ke Supabase
-Sesuai rancangan, database aplikasi ini siap untuk dipindahkan ke layanan awan **Supabase** (PostgreSQL).
-Jika Anda ingin mengubah koneksi ke Supabase:
-1. Pastikan Anda telah membuat proyek di Supabase dan menyalin sintaks skema PostgreSQL dari file `supabase_schema_migration.md`.
-2. Ubah `config/koneksi.php` agar menggunakan metode **PDO** (PostgreSQL) karena sintaks bawaan `mysqli_` tidak didukung oleh Postgres.
-3. Masukkan kredensial Supabase Anda ke dalam file `.env` yang baru.
+## 🌟 Fitur Utama (Features)
 
-## Struktur Aplikasi Saat Ini
-- **`index.php`**: Entry point utama. Mencegah akses tak sah dan mengatur routing ke dasbor terkait.
-- **`auth/`**: Sistem login dan register dengan desain CSS kustom.
-- **`user/` & `admin/`**: Panel dasbor dengan **UI/UX standar modern** (Tailwind CSS, Glassmorphism). Seluruh kode berantakan sebelumnya telah dibersihkan.
-- **`partials/`**: Sidebar & Header dinamis yang tidak lagi menduplikasi tag HTML utama, mencegah kerusakan tata letak halaman.
+Aplikasi LibPoint dilengkapi dengan berbagai fitur modern untuk mendukung ekosistem perpustakaan yang interaktif dan aman:
+
+1. **Autentikasi & Keamanan Tingkat Lanjut (Supabase Auth)**
+   - Login dan Pendaftaran pengguna dengan pemisahan peran (Mahasiswa & Non-Mahasiswa).
+   - Menggunakan NPM/NIP sebagai lapisan kredensial tambahan.
+   - **Enkripsi Data PII**: Data pribadi pengguna (Personally Identifiable Information) dienkripsi di tingkat database menggunakan `ENCRYPTION_KEY` untuk menjaga privasi.
+
+2. **Dashboard Interaktif & Modern**
+   - Antarmuka pengguna (UI/UX) premium menggunakan **Tailwind CSS** dengan efek Glassmorphism.
+   - Panel terpusat untuk memantau semua aktivitas perpustakaan.
+
+3. **Manajemen Koleksi Buku (Books)**
+   - **Records**: Pencatatan dan penelusuran katalog buku perpustakaan.
+   - **Wishlist**: Pengguna dapat menambahkan buku yang diinginkan ke dalam daftar harapan (wishlist).
+
+4. **Sistem Peminjaman (Loans)**
+   - Manajemen sirkulasi, pelacakan peminjaman, dan pengembalian buku secara digital.
+
+5. **AI Assistant & Knowledge Base Chat**
+   - Asisten cerdas berbasis AI yang terintegrasi untuk membantu pengguna mencari informasi atau bertanya seputar koleksi perpustakaan (Knowledge Base).
+
+6. **Gamifikasi: Sistem Poin & Hadiah (Points & Rewards)**
+   - Program Loyalitas Pemustaka: Pengguna mendapatkan poin dari aktivitas (seperti meminjam buku) yang dapat ditukarkan dengan berbagai hadiah (Rewards).
+
+7. **Komunitas (Community)**
+   - Ruang interaksi antar pemustaka untuk berbagi ulasan, diskusi, atau rekomendasi buku.
+
+---
+
+## 🚀 Cara Menjalankan Secara Lokal (How to Run)
+
+Ikuti langkah-langkah berikut untuk menjalankan aplikasi LibPoint di komputer Anda (Local Environment):
+
+### 1. Persyaratan Sistem
+Pastikan sistem Anda telah terinstal:
+- **Node.js** (Versi 18 atau lebih baru disarankan).
+- **Git** (Opsional, untuk version control).
+
+### 2. Instalasi Dependensi
+Buka terminal (Command Prompt, PowerShell, atau Terminal bawaan OS), arahkan ke folder root proyek, lalu jalankan perintah berikut untuk menginstal semua library yang dibutuhkan:
+```bash
+npm install
+```
+
+### 3. Konfigurasi Environment Variables (.env)
+Aplikasi ini membutuhkan beberapa kredensial layanan pihak ketiga (Supabase).
+1. Buat file baru bernama **`.env.local`** di folder root proyek (sejajar dengan `package.json`).
+2. Tambahkan variabel berikut ke dalam file tersebut (sesuaikan nilainya dengan kredensial Anda, atau copy dari `.env.local` yang sudah ada jika ada):
+
+```env
+# Koneksi Database & Auth Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_ID].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[YOUR_SUPABASE_ANON_KEY]
+
+# Kunci Enkripsi (Gunakan string hex 32-byte rahasia)
+ENCRYPTION_KEY=[YOUR_SECRET_ENCRYPTION_KEY]
+
+# Opsional: Jika menggunakan model/provider AI eksternal, masukkan API key yang relevan
+OPENAI_API_KEY=[YOUR_OPENAI_API_KEY]
+```
+
+### 4. Jalankan Development Server
+Setelah semua terkonfigurasi, jalankan server mode pengembang (development):
+```bash
+npm run dev
+```
+Buka browser Anda dan akses **[http://localhost:3000](http://localhost:3000)**. Aplikasi akan memuat ulang secara otomatis jika Anda melakukan perubahan pada kode.
+
+---
+
+## 🌐 Cara Melakukan Deployment (How to Deploy)
+
+Aplikasi berbasis Next.js sangat direkomendasikan untuk di-deploy menggunakan **Vercel** karena integrasinya yang otomatis dan mudah.
+
+### Langkah-langkah Deployment via Vercel:
+1. **Push ke Repository**: Pastikan seluruh kode proyek Anda sudah di-push ke repository Git online (GitHub, GitLab, atau Bitbucket).
+2. **Buat Proyek di Vercel**:
+   - Login ke akun [Vercel](https://vercel.com/).
+   - Klik tombol **"Add New..."** lalu pilih **"Project"**.
+3. **Hubungkan Repository**:
+   - Pilih repository Git yang berisi proyek LibPoint Anda dan klik **"Import"**.
+4. **Konfigurasi Variabel Lingkungan (Environment Variables)**:
+   - Sebelum mengklik Deploy, buka bagian **Environment Variables**.
+   - Tambahkan satu per satu kunci (keys) yang ada di file `.env.local` Anda (seperti `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ENCRYPTION_KEY`) beserta nilainya.
+5. **Proses Deploy**:
+   - Klik tombol **"Deploy"**.
+   - Vercel akan mulai mengunduh dependensi, membangun (build) proyek, dan mempublikasikannya.
+6. **Selesai**:
+   - Setelah proses selesai, Vercel akan memberikan URL publik (domain) di mana aplikasi Anda sudah live dan dapat diakses oleh siapa saja.

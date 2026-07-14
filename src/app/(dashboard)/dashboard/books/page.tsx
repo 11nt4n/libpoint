@@ -143,7 +143,9 @@ export default function UserBooksCatalog() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto relative min-h-screen pb-12">
+      {/* Background Dasar Custom */}
+      <div className="fixed inset-0 bg-[#a8caca] -z-10 pointer-events-none"></div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#0B2C4A]">Sirkulasi Buku</h1>

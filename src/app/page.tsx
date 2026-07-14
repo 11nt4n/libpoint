@@ -85,19 +85,17 @@ export default function Home() {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Simpan ke tabel profiles
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              user_id: regData.npm,
-              nama_lengkap: regData.namaLengkap,
-              email: regData.email,
-              npm: regData.npm,
-              role: 'user'
-            }
-          ]);
+        const { createEncryptedProfile } = await import('@/app/actions/profiles');
+        
+        // Simpan ke tabel profiles via Server Action (Encrypted PII)
+        const { error: profileError } = await createEncryptedProfile({
+          id: authData.user.id,
+          user_id: regData.npm,
+          nama_lengkap: regData.namaLengkap,
+          email: regData.email,
+          npm: regData.npm,
+          role: 'user'
+        });
         
         if (profileError) {
           console.error("Gagal menyimpan ke profil:", profileError);

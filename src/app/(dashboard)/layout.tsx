@@ -28,11 +28,8 @@ export default function DashboardLayout({
 
       setUser(session.user);
 
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
+      const { getEncryptedProfile } = await import('@/app/actions/profiles');
+      const { data: profileData } = await getEncryptedProfile(session.user.id);
         
       setProfile(profileData);
       setLoading(false);

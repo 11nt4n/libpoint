@@ -32,28 +32,15 @@ export default function AdminPointsPage() {
     setMessage(null);
 
     try {
-      // 1. Cari user berdasarkan NPM
-      const { data: user, error: userError } = await supabase
-        .from('profiles')
-        .select('npm, total_points, nama_lengkap')
-        .eq('npm', npm)
-        .single();
+      const { addPointsByNpm } = await import('@/app/actions/profiles');
+      
+      const { data: user, error: userError } = await addPointsByNpm(npm, selectedRule.point);
 
       if (userError || !user) {
-        throw new Error('Mahasiswa dengan NPM tersebut tidak ditemukan.');
+        throw new Error(userError || 'Mahasiswa dengan NPM tersebut tidak ditemukan.');
       }
 
-      // 2. Tambahkan poin ke profil (kalau ada tabel point_transactions, tambahkan juga kesana nanti)
-      const newTotal = (user.total_points || 0) + selectedRule.point;
-      
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ total_points: newTotal })
-        .eq('npm', npm);
-
-      if (updateError) throw updateError;
-
-      setMessage({ type: 'success', text: `Berhasil menambahkan ${selectedRule.point} poin kepada ${user.nama_lengkap} (${user.npm}). Total saat ini: ${newTotal} Poin.` });
+      setMessage({ type: 'success', text: `Berhasil menambahkan ${selectedRule.point} poin kepada ${user.nama_lengkap} (${user.npm}). Total saat ini: ${user.total_points} Poin.` });
       setNpm('');
       setSelectedActivity('');
 

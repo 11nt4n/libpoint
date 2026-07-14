@@ -40,8 +40,10 @@ export default function RegisterPage() {
       }
 
       if (authData.user) {
-        // 2. Insert into profiles table
-        const { error: profileError } = await supabase.from('profiles').insert({
+        const { createEncryptedProfile } = await import('@/app/actions/profiles');
+        
+        // 2. Insert into profiles table via server action to encrypt PII
+        const { error: profileError } = await createEncryptedProfile({
           id: authData.user.id,
           user_id: formData.npm, // Using NPM as user_id for simplicity as in old app
           nama_lengkap: formData.nama_lengkap,
@@ -52,7 +54,7 @@ export default function RegisterPage() {
         });
 
         if (profileError) {
-          setError('Berhasil mendaftar akun, tetapi gagal menyimpan profil: ' + profileError.message);
+          setError('Berhasil mendaftar akun, tetapi gagal menyimpan profil: ' + profileError);
           return;
         }
 
