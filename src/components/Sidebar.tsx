@@ -18,7 +18,8 @@ import {
   ChevronDown,
   ChevronRight,
   Heart,
-  List
+  List,
+  Database
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -56,6 +57,7 @@ export default function Sidebar({ role }: SidebarProps) {
     { name: 'Manajemen Poin', href: '/admin/points', icon: Trophy },
     { name: 'Pengumuman', href: '/admin/announcements', icon: Bell },
     { name: 'Approval Penukaran', href: '/admin/redemptions', icon: Gift },
+    { name: 'Manajemen AI Materi', href: '/admin/knowledge-base', icon: Database },
   ];
 
   const userMenus: Menu[] = [
@@ -84,13 +86,13 @@ export default function Sidebar({ role }: SidebarProps) {
     const isActive = isDashboard ? isExactActive : (pathname.startsWith(menu.href) || isChildActive);
     
     const Icon = menu.icon;
-    const isExpanded = expandedMenu === menu.name || (isActive && expandedMenu !== false && menu.submenu);
+    const isExpanded = expandedMenu === menu.name || (isActive && expandedMenu === null && !!menu.submenu);
 
     return (
       <div key={menu.href} className="flex flex-col gap-1">
         {menu.submenu ? (
           <button
-            onClick={() => setExpandedMenu(isExpanded ? null : menu.name)}
+            onClick={() => setExpandedMenu(isExpanded ? "" : menu.name)}
             className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
               isActive
                 ? 'bg-primary/10 text-primary font-semibold'

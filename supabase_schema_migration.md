@@ -109,4 +109,16 @@ CREATE TABLE IF NOT EXISTS gallery_activities (
 -- Jalankan perintah ini di Supabase SQL Editor Anda:
 ALTER TABLE borrowings ADD COLUMN IF NOT EXISTS due_date TIMESTAMP;
 ALTER TABLE borrowings ADD COLUMN IF NOT EXISTS extend_count INT DEFAULT 0;
+
+-- 9. Tabel Knowledge Bases (AI Assistant)
+CREATE TABLE IF NOT EXISTS knowledge_bases (
+  id SERIAL PRIMARY KEY,
+  filename TEXT NOT NULL,
+  content TEXT NOT NULL,
+  file_url TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Jangan lupa untuk membuat Storage Bucket baru bernama "knowledge_base" di menu Storage Supabase Anda,
+-- dan atur agar bucket tersebut Public jika ingin PDF bisa diakses langsung melalui URL.
 ```

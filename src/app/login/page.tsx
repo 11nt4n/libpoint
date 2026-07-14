@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
@@ -12,6 +12,50 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Vanta JS State
+  const [vantaEffect, setVantaEffect] = useState<any>(null);
+  const vantaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let effect: any;
+    const loadVanta = async () => {
+      try {
+        // @ts-ignore
+        const THREE = await import('three');
+        // @ts-ignore
+        const CELLS = (await import('vanta/dist/vanta.cells.min')).default;
+        
+        if (!vantaEffect && vantaRef.current) {
+          effect = CELLS({
+            el: vantaRef.current,
+            THREE: THREE,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            color1: 0x3b82f6, // blue-500
+            color2: 0xa855f7, // purple-500
+            size: 2.0,
+            speed: 1.5
+          });
+          setVantaEffect(effect);
+        }
+      } catch (err) {
+        console.error("Vanta initialization error:", err);
+      }
+    };
+    
+    if (typeof window !== 'undefined') {
+      loadVanta();
+    }
+    
+    return () => {
+      if (effect) effect.destroy();
+    };
+  }, [vantaEffect]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +92,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Vanta Interactive Background */}
+      <div ref={vantaRef} className="absolute inset-0 -z-20"></div>
+
       {/* Decorative Orbs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -z-10 mix-blend-screen animate-pulse"></div>
       <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-purple-500/20 rounded-full blur-3xl -z-10 mix-blend-screen" style={{ animationDelay: '2s', animationDuration: '4s' }}></div>

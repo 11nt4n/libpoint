@@ -10,13 +10,74 @@ import { FileUp } from 'lucide-react';
 
 export default function ChatPage() {
   const [input, setInput] = useState('');
-  const { messages, status, error, sendMessage, regenerate } = useChat({
+  const { messages, status, error, sendMessage, regenerate, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
   });
   const isLoading = status === 'submitted' || status === 'streaming';
   const [isAdmin, setIsAdmin] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  
+  // History states
+  const [sessions, setSessions] = useState<{id: string, date: string, preview: string, messages: any[]}[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string>('');
+
+  // Load history from local storage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('libpoint_chat_history');
+    if (saved) {
+      try {
+        setSessions(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse chat history");
+      }
+    }
+  }, []);
+
+  // Save to local storage whenever messages update
+  useEffect(() => {
+    if (messages.length === 0) return;
+    
+    let sessionId = currentSessionId;
+    if (!sessionId) {
+      sessionId = Date.now().toString();
+      setCurrentSessionId(sessionId);
+    }
+
+    setSessions(prev => {
+      const existing = prev.filter(s => s.id !== sessionId);
+      const previewMsg = messages.find(m => m.role === 'user');
+      let preview = 'Percakapan AI';
+      if (previewMsg) {
+        preview = previewMsg.content || (previewMsg.parts && previewMsg.parts[0]?.text) || preview;
+      }
+      
+      const updated = [
+        {
+          id: sessionId,
+          date: new Date().toISOString(),
+          preview: preview.substring(0, 50) + (preview.length > 50 ? '...' : ''),
+          messages: messages
+        },
+        ...existing
+      ];
+      
+      localStorage.setItem('libpoint_chat_history', JSON.stringify(updated));
+      return updated;
+    });
+  }, [messages, currentSessionId]);
+
+  const loadSession = (sessionData: any) => {
+    setCurrentSessionId(sessionData.id);
+    setMessages(sessionData.messages);
+    setShowHistoryModal(false);
+  };
+
+  const startNewChat = () => {
+    setCurrentSessionId('');
+    setMessages([]);
+    setShowHistoryModal(false);
+  };
+
   
   useEffect(() => {
     const fetchRole = async () => {
@@ -28,34 +89,6 @@ export default function ChatPage() {
     };
     fetchRole();
   }, []);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const res = await fetch('/api/chat/kb', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (res.ok) {
-        alert('Knowledge base berhasil diunggah!');
-      } else {
-        alert('Gagal mengunggah knowledge base.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Terjadi kesalahan saat mengunggah file.');
-    } finally {
-      setUploading(false);
-      if (e.target) e.target.value = '';
-    }
-  };
   
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -83,6 +116,14 @@ export default function ChatPage() {
           <p className="text-sm text-gray-500">Tanyakan apa saja seputar perpustakaan dan koleksi buku kami.</p>
         </div>
         <div className="flex items-center gap-2">
+          {messages.length > 0 && (
+            <button 
+              onClick={startNewChat}
+              className="bg-primary text-white hover:bg-primary-hover px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors shadow-sm"
+            >
+              + Chat Baru
+            </button>
+          )}
           <button 
             onClick={() => setShowHistoryModal(true)}
             className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors shadow-sm"
@@ -90,14 +131,6 @@ export default function ChatPage() {
             <History className="w-4 h-4" />
             Histori
           </button>
-          
-          {isAdmin && (
-            <label className="cursor-pointer bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors shadow-sm">
-              <FileUp className="w-4 h-4" />
-              {uploading ? 'Mengunggah...' : 'Knowledge Base'}
-              <input type="file" accept=".txt" className="hidden" onChange={handleFileUpload} disabled={uploading} />
-            </label>
-          )}
         </div>
       </div>
 
@@ -119,11 +152,33 @@ export default function ChatPage() {
             </div>
             
             <div className="p-6 overflow-y-auto flex-1 bg-white">
-              <div className="text-center py-8">
-                <History className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">Belum ada histori pencarian.</p>
-                <p className="text-sm text-gray-400 mt-1">Percakapan Anda sebelumnya akan muncul di sini.</p>
-              </div>
+              {sessions.length === 0 ? (
+                <div className="text-center py-8">
+                  <History className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">Belum ada histori pencarian.</p>
+                  <p className="text-sm text-gray-400 mt-1">Percakapan Anda sebelumnya akan muncul di sini.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sessions.map((session) => (
+                    <button
+                      key={session.id}
+                      onClick={() => loadSession(session)}
+                      className={`w-full text-left p-4 rounded-xl border transition-all ${
+                        currentSessionId === session.id 
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary/20' 
+                          : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <p className="font-medium text-gray-900 truncate mb-1">{session.preview}</p>
+                      <p className="text-xs text-gray-500 flex items-center justify-between">
+                        <span>{new Date(session.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-gray-400">{session.messages.length} pesan</span>
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

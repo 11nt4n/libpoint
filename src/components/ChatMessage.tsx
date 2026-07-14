@@ -26,12 +26,16 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-full`}>
           {isUser ? (
             <div className="px-5 py-3 rounded-[24px] bg-gray-100 text-gray-900 text-[15px] leading-relaxed">
-              <ReactMarkdown className="prose prose-sm max-w-none break-words">{content}</ReactMarkdown>
+              <div className="prose prose-sm max-w-none break-words">
+                <ReactMarkdown>{content}</ReactMarkdown>
+              </div>
             </div>
           ) : (
             <div className="py-1 text-gray-900 text-[15px] leading-relaxed w-full">
               <div className="font-semibold text-gray-900 mb-1">LibPoint AI</div>
-              <ReactMarkdown className="prose prose-sm max-w-none break-words">{content}</ReactMarkdown>
+              <div className="prose prose-sm max-w-none break-words">
+                <ReactMarkdown>{content}</ReactMarkdown>
+              </div>
             </div>
           )}
         </div>
