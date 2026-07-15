@@ -119,7 +119,7 @@ export default function KnowledgeBaseAdmin() {
           <p className="text-gray-500 mt-1">Kelola materi referensi format PDF untuk dipelajari oleh LibPoint AI.</p>
         </div>
 
-        <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium transition-colors shadow-sm">
+        <label className="cursor-pointer bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium transition-colors shadow-sm">
           {uploading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
@@ -194,7 +194,7 @@ export default function KnowledgeBaseAdmin() {
                             href={kb.file_url} 
                             target="_blank" 
                             rel="noreferrer"
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
                             title="Buka PDF"
                           >
                             <FileText className="w-4 h-4" />

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { BookOpen, Loader2, ArrowLeft, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { BookOpen, Loader2, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+
+import BooksNavigation from '@/components/BooksNavigation';
 
 export default function RecordsPage() {
   const [borrowings, setBorrowings] = useState<any[]>([]);
@@ -79,11 +81,9 @@ export default function RecordsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/books" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </Link>
+    <div className="space-y-6 max-w-7xl mx-auto relative min-h-screen pb-12">
+      <BooksNavigation />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#0B2C4A]">Catatan Peminjaman</h1>
           <p className="text-gray-500 mt-1">Pantau buku yang sedang atau pernah Anda pinjam di sini.</p>

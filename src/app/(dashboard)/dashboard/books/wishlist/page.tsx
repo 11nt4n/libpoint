@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { BookOpen, Loader2, ShoppingCart, Trash2, ArrowLeft } from 'lucide-react';
+import { BookOpen, Loader2, ShoppingCart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+
+import BooksNavigation from '@/components/BooksNavigation';
 
 export default function WishlistPage() {
   const [wishlist, setWishlist] = useState<any[]>([]);
@@ -33,17 +35,17 @@ export default function WishlistPage() {
     setLoading(false);
   };
 
-  async function handleRemove(bookId: number) {
+  async function removeFromWishlist(bookId: number) {
     if (!user) return;
     try {
       await supabase.from('wishlists').delete().eq('user_id', user.id).eq('book_id', bookId);
       fetchWishlist(user.id);
     } catch (error: any) {
-      alert('Gagal menghapus dari keranjang: ' + error.message);
+      alert('Gagal menghapus: ' + error.message);
     }
   }
 
-  async function handleCheckoutAll() {
+  async function handleCheckout() {
     if (!user || wishlist.length === 0) return;
     setIsCheckingOut(true);
 
@@ -52,8 +54,7 @@ export default function WishlistPage() {
       dueDate.setDate(dueDate.getDate() + 14); // Default 14 hari pinjam
 
       for (const book of wishlist) {
-        const { data: currentBook } = await supabase.from('books').select('stok_tersedia').eq('id', book.id).single();
-        if (currentBook && currentBook.stok_tersedia > 0) {
+        if ((book.stok_tersedia ?? 1) > 0) {
           await supabase.from('borrowings').insert({
             book_id: book.id,
             user_id: user.id,
@@ -80,11 +81,9 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/books" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </Link>
+    <div className="space-y-6 max-w-7xl mx-auto relative min-h-screen pb-12">
+      <BooksNavigation />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#0B2C4A]">Keranjang Pinjam (Wishlist)</h1>
           <p className="text-gray-500 mt-1">Daftar buku yang ingin Anda pinjam.</p>
@@ -129,8 +128,9 @@ export default function WishlistPage() {
                         Stok Tersedia: {book.stok_tersedia ?? 1}
                       </span>
                       <button 
-                        onClick={() => handleRemove(book.id)}
-                        className="text-sm text-red-500 hover:text-red-700 font-medium px-3 py-2 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
+                        onClick={() => removeFromWishlist(book.id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                        title="Hapus dari Keranjang"
                       >
                         <Trash2 className="w-4 h-4" /> Hapus
                       </button>
@@ -149,9 +149,9 @@ export default function WishlistPage() {
               <span className="text-xl font-bold text-gray-900">{wishlist.length} Buku</span>
             </div>
             <button 
-              onClick={handleCheckoutAll}
-              disabled={isCheckingOut}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2"
+              onClick={handleCheckout}
+              disabled={isCheckingOut || wishlist.length === 0}
+              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white py-3 px-6 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20"
             >
               {isCheckingOut ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Memproses Peminjaman...</>

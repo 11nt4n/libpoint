@@ -254,7 +254,7 @@ export default function UserDashboard() {
   return (
     <div className="space-y-12 pb-12 font-sans">
       {/* FIRST SCREEN WRAPPER */}
-      <div className="relative -mt-8 -mx-8 px-8 md:px-12 pt-32 pb-16 min-h-[calc(100vh-5rem)] flex flex-col justify-between gap-12 overflow-hidden">
+      <div className="relative -mt-4 sm:-mt-8 -mx-4 sm:-mx-8 px-8 md:px-12 pt-32 pb-16 min-h-[calc(100vh-5rem)] flex flex-col justify-between gap-12 overflow-hidden">
 
         {/* Background Image bg1.png */}
         <div className="absolute inset-0 z-0 pointer-events-none">
