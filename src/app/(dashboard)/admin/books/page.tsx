@@ -21,6 +21,8 @@ export default function AdminBooksPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [newBook, setNewBook] = useState({
     title: '',
+    author: '',
+    description: '',
     item_code: '',
     item_status_name: 'Available',
     call_number: '',
@@ -105,6 +107,8 @@ export default function AdminBooksPage() {
       setCoverFile(null);
       setNewBook({
         title: '',
+        author: '',
+        description: '',
         item_code: '',
         item_status_name: 'Available',
         call_number: '',
@@ -126,6 +130,8 @@ export default function AdminBooksPage() {
     setEditBookId(null);
     setNewBook({
       title: '',
+      author: '',
+      description: '',
       item_code: '',
       item_status_name: 'Available',
       call_number: '',
@@ -143,6 +149,8 @@ export default function AdminBooksPage() {
     setEditBookId(book.id);
     setNewBook({
       title: book.title || '',
+      author: book.author || '',
+      description: book.description || '',
       item_code: book.item_code || '',
       item_status_name: book.item_status_name || 'Available',
       call_number: book.call_number || '',
@@ -174,19 +182,12 @@ export default function AdminBooksPage() {
           <h1 className="text-2xl font-bold text-[#0B2C4A]">Sirkulasi Buku</h1>
           <p className="text-gray-500 mt-1">Kelola data buku yang tersedia di perpustakaan.</p>
         </div>
-        <button 
-          onClick={openAddModal}
-          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Tambah Buku
-        </button>
       </div>
 
       {/* Table Section */}
-      <div className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <div className="relative w-full max-w-sm">
+      <div className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden flex flex-col mt-4">
+        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between bg-gray-50/50">
+          <div className="relative w-full sm:max-w-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
@@ -198,6 +199,13 @@ export default function AdminBooksPage() {
               placeholder="Cari judul buku atau kode eksemplar..."
             />
           </div>
+          <button 
+            onClick={openAddModal}
+            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto"
+          >
+            <Plus className="w-4 h-4" />
+            Tambah Buku
+          </button>
         </div>
         <div className="p-6">
           {loading ? (
@@ -210,57 +218,72 @@ export default function AdminBooksPage() {
               Belum ada data buku. Pastikan Anda sudah membuat tabel `books` di database.
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {books.map((book) => (
-                <div key={book.id} className="group relative flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                  <div className="relative aspect-[3/4] w-full bg-gray-50 flex items-center justify-center overflow-hidden">
-                    {book.cover_url ? (
-                      <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <ImageIcon className="w-12 h-12 text-gray-300" />
-                    )}
-                    
-                    {/* Hover Overlay Actions */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                      <button 
-                        onClick={() => openEditModal(book)}
-                        className="p-2.5 bg-white text-blue-600 rounded-xl hover:bg-blue-50 hover:scale-110 transition-transform shadow-lg"
-                        title="Edit Buku"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteBook(book.id)}
-                        className="p-2.5 bg-white text-red-600 rounded-xl hover:bg-red-50 hover:scale-110 transition-transform shadow-lg"
-                        title="Hapus Buku"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    
-                    <div className="absolute top-2 right-2">
-                      <span className={`px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md ${
-                        (book.stok_tersedia ?? 1) > 0 ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
-                      }`}>
-                        {(book.stok_tersedia ?? 1) > 0 ? `Stok: ${book.stok_tersedia}` : 'Habis'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-4 flex flex-col flex-1">
-                    <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight mb-2 group-hover:text-primary transition-colors">
-                      {book.title}
-                    </h3>
-                    <div className="mt-auto space-y-1">
-                      <p className="text-[11px] text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded inline-block">
-                        {book.item_code}
-                      </p>
-                      <p className="text-[11px] text-gray-500 truncate" title={book.location_name}>
-                        Rak: {book.location_name || '-'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-600">
+                <thead className="bg-gray-50 text-gray-700 uppercase font-semibold text-xs border-b border-gray-100">
+                  <tr>
+                    <th className="px-6 py-4">Sampul</th>
+                    <th className="px-6 py-4">Judul Buku</th>
+                    <th className="px-6 py-4">Kode Eksemplar</th>
+                    <th className="px-6 py-4">Call Number</th>
+                    <th className="px-6 py-4">Rak</th>
+                    <th className="px-6 py-4">Stok</th>
+                    <th className="px-6 py-4 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {books.map((book) => (
+                    <tr key={book.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="w-12 h-16 bg-gray-100 rounded flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
+                          {book.cover_url ? (
+                            <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <ImageIcon className="w-5 h-5 text-gray-400" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900 line-clamp-2 max-w-xs">{book.title}</div>
+                        {book.author && <div className="text-xs text-gray-500 mt-1">{book.author}</div>}
+                      </td>
+                      <td className="px-6 py-4"><span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">{book.item_code}</span></td>
+                      <td className="px-6 py-4"><span className="font-mono text-gray-600 text-xs">{book.call_number || '-'}</span></td>
+                      <td className="px-6 py-4 text-gray-600">{book.location_name || '-'}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1">
+                          <span className={`px-2 py-1 rounded-md text-[10px] font-bold w-fit ${
+                            (book.stok_tersedia ?? 1) > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            Tersedia: {book.stok_tersedia ?? 0}
+                          </span>
+                          <span className="px-2 py-1 rounded-md text-[10px] font-bold w-fit bg-orange-100 text-orange-700">
+                            Dipinjam: {book.stok_dipinjam ?? 0}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => openEditModal(book)}
+                            className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                            title="Edit Buku"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteBook(book.id)}
+                            className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Hapus Buku"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -313,6 +336,25 @@ export default function AdminBooksPage() {
                     onChange={(e) => setNewBook({...newBook, title: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
                     placeholder="Masukkan judul buku..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Penulis Buku</label>
+                  <input 
+                    type="text" 
+                    value={newBook.author}
+                    onChange={(e) => setNewBook({...newBook, author: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+                    placeholder="Masukkan nama penulis..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi Buku</label>
+                  <textarea 
+                    value={newBook.description}
+                    onChange={(e) => setNewBook({...newBook, description: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-y min-h-[80px]"
+                    placeholder="Masukkan deskripsi singkat atau sinopsis buku..."
                   />
                 </div>
                 <div>

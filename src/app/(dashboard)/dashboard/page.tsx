@@ -39,11 +39,11 @@ function ImageCarousel() {
   const [galleryData, setGalleryData] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
-  
+
   // Modal state
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ function ImageCarousel() {
         .from('gallery_activities')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (data && data.length > 0) {
         setGalleryData(data);
       } else {
@@ -61,9 +61,9 @@ function ImageCarousel() {
         setGalleryData([
           { id: -1, image_url: '/1.jpg', title: 'Diskusi', subtitle: 'Ruang Kolaborasi', article_content: 'Acara diskusi mingguan untuk membahas inovasi dan literasi terkini bersama mahasiswa dan pengajar.' },
           { id: -2, image_url: '/2.png', title: 'Literasi', subtitle: 'Kunjungan Taruna', article_content: 'Kunjungan rutin taruna ke perpustakaan untuk memperluas wawasan keamanan siber dan kriptografi.' },
-          { id: -3, image_url: '/hero-illustration.png', title: 'Koleksi', subtitle: 'Buku Terbaru', article_content: 'Pembaruan koleksi buku-buku referensi internasional yang menunjang perkuliahan.' }, 
-          { id: -4, image_url: '/1.jpg', title: 'Fasilitas', subtitle: 'Kenyamanan Membaca', article_content: 'Peningkatan fasilitas baca dengan pencahayaan dan kursi ergonomis.' }, 
-          { id: -5, image_url: '/2.png', title: 'Event', subtitle: 'Seminar Nasional', article_content: 'Seminar nasional bertajuk "Tantangan Siber di Era AI" dengan pembicara ahli dari BSSN.' }, 
+          { id: -3, image_url: '/hero-illustration.png', title: 'Koleksi', subtitle: 'Buku Terbaru', article_content: 'Pembaruan koleksi buku-buku referensi internasional yang menunjang perkuliahan.' },
+          { id: -4, image_url: '/1.jpg', title: 'Fasilitas', subtitle: 'Kenyamanan Membaca', article_content: 'Peningkatan fasilitas baca dengan pencahayaan dan kursi ergonomis.' },
+          { id: -5, image_url: '/2.png', title: 'Event', subtitle: 'Seminar Nasional', article_content: 'Seminar nasional bertajuk "Tantangan Siber di Era AI" dengan pembicara ahli dari BSSN.' },
         ]);
       }
     };
@@ -84,94 +84,94 @@ function ImageCarousel() {
   return (
     <>
       <div className="relative w-full h-[450px] md:h-[600px] flex items-center justify-center overflow-visible">
-         {/* Container for slides */}
-         <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
-           {galleryData.map((item, index) => {
-             let offset = (index - currentIndex) % galleryData.length;
-             if (offset < 0) offset += galleryData.length;
-             if (offset > galleryData.length / 2) offset -= galleryData.length;
-             
-             let zIndex = 10;
-             let transform = 'translateX(0) scale(1)';
-             let opacity = 1;
-             
-             if (offset === 0) {
-               zIndex = 30;
-               transform = 'translateX(0) scale(1)';
-               opacity = 1;
-             } else if (offset === -1 || (offset < 0 && offset > -2)) { // Left 1
-               zIndex = 20;
-               transform = 'translateX(-70%) scale(0.85)';
-               opacity = 0.8;
-             } else if (offset === 1 || (offset > 0 && offset < 2)) { // Right 1
-               zIndex = 20;
-               transform = 'translateX(70%) scale(0.85)';
-               opacity = 0.8;
-             } else if (offset === -2 || (offset < 0 && offset <= -2)) { // Left 2
-               zIndex = 10;
-               transform = 'translateX(-130%) scale(0.7)';
-               opacity = 0.4;
-             } else if (offset === 2 || (offset > 0 && offset >= 2)) { // Right 2
-               zIndex = 10;
-               transform = 'translateX(130%) scale(0.7)';
-               opacity = 0.4;
-             } else {
-               zIndex = 0;
-               transform = 'translateX(0) scale(0.5)';
-               opacity = 0;
-             }
+        {/* Container for slides */}
+        <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
+          {galleryData.map((item, index) => {
+            let offset = (index - currentIndex) % galleryData.length;
+            if (offset < 0) offset += galleryData.length;
+            if (offset > galleryData.length / 2) offset -= galleryData.length;
 
-             const isActive = offset === 0;
+            let zIndex = 10;
+            let transform = 'translateX(0) scale(1)';
+            let opacity = 1;
 
-             return (
-                <div 
-                  key={item.id}
-                  className="absolute top-1/2 -translate-y-1/2 transition-all duration-700 ease-[cubic-bezier(0.25,0.8,0.25,1)] cursor-pointer"
-                  style={{ transform, zIndex, opacity }}
-                  onClick={() => {
-                    if (!isActive) setCurrentIndex(index);
-                  }}
-                >
-                  <div className="relative group">
-                    {/* White background frame (only visible on active) */}
-                    <div className={`absolute -inset-4 md:-inset-6 md:-bottom-24 -bottom-20 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all duration-700 ease-[cubic-bezier(0.25,0.8,0.25,1)] ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}></div>
-                    
-                    {/* Image Wrapper */}
-                    <div className={`relative w-[240px] h-[320px] md:w-[340px] md:h-[440px] overflow-hidden z-10 shadow-lg bg-slate-100 transition-all duration-700 ${isActive ? 'shadow-none' : 'shadow-lg'}`}>
-                      {imgErrors[item.id] || !item.image_url ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
-                           <ImageIcon className="w-16 h-16 mb-4 opacity-50" />
-                           <span className="text-sm font-semibold opacity-70">No Image Available</span>
-                        </div>
-                      ) : (
-                        <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" onError={() => handleImageError(item.id)} />
-                      )}
-                      
-                      {/* Dark gradient overlay for text */}
-                      <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-700 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}></div>
-                      
-                      {/* Text Overlay */}
-                      <div className={`absolute bottom-6 left-6 text-white transition-all duration-700 transform ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-                         <h3 className="text-3xl md:text-5xl font-bold mb-1 tracking-tight drop-shadow-md">{item.title}</h3>
-                         <p className="text-sm md:text-lg text-slate-200 drop-shadow-md">{item.subtitle}</p>
+            if (offset === 0) {
+              zIndex = 30;
+              transform = 'translateX(0) scale(1)';
+              opacity = 1;
+            } else if (offset === -1 || (offset < 0 && offset > -2)) { // Left 1
+              zIndex = 20;
+              transform = 'translateX(-70%) scale(0.85)';
+              opacity = 0.8;
+            } else if (offset === 1 || (offset > 0 && offset < 2)) { // Right 1
+              zIndex = 20;
+              transform = 'translateX(70%) scale(0.85)';
+              opacity = 0.8;
+            } else if (offset === -2 || (offset < 0 && offset <= -2)) { // Left 2
+              zIndex = 10;
+              transform = 'translateX(-130%) scale(0.7)';
+              opacity = 0.4;
+            } else if (offset === 2 || (offset > 0 && offset >= 2)) { // Right 2
+              zIndex = 10;
+              transform = 'translateX(130%) scale(0.7)';
+              opacity = 0.4;
+            } else {
+              zIndex = 0;
+              transform = 'translateX(0) scale(0.5)';
+              opacity = 0;
+            }
+
+            const isActive = offset === 0;
+
+            return (
+              <div
+                key={item.id}
+                className="absolute top-1/2 -translate-y-1/2 transition-all duration-700 ease-[cubic-bezier(0.25,0.8,0.25,1)] cursor-pointer"
+                style={{ transform, zIndex, opacity }}
+                onClick={() => {
+                  if (!isActive) setCurrentIndex(index);
+                }}
+              >
+                <div className="relative group">
+                  {/* White background frame (only visible on active) */}
+                  <div className={`absolute -inset-4 md:-inset-6 md:-bottom-24 -bottom-20 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all duration-700 ease-[cubic-bezier(0.25,0.8,0.25,1)] ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}></div>
+
+                  {/* Image Wrapper */}
+                  <div className={`relative w-[240px] h-[320px] md:w-[340px] md:h-[440px] overflow-hidden z-10 shadow-lg bg-slate-100 transition-all duration-700 ${isActive ? 'shadow-none' : 'shadow-lg'}`}>
+                    {imgErrors[item.id] || !item.image_url ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
+                        <ImageIcon className="w-16 h-16 mb-4 opacity-50" />
+                        <span className="text-sm font-semibold opacity-70">No Image Available</span>
                       </div>
-                    </div>
-                    
-                    {/* Discover More Bottom Section */}
-                    <div 
-                      onClick={() => {
-                        if (isActive) openModal(item);
-                      }}
-                      className={`absolute -bottom-16 left-0 w-full flex flex-col items-center justify-center text-slate-500 hover:text-primary transition-all duration-700 z-10 ${isActive ? 'opacity-100 translate-y-0 cursor-pointer' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-                    >
-                      <span className="text-xs font-bold tracking-widest uppercase mb-1 text-center">Discover More</span>
-                      <ChevronRight className="w-6 h-6 rotate-90 transition-transform duration-300 hover:translate-y-1" />
+                    ) : (
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" onError={() => handleImageError(item.id)} />
+                    )}
+
+                    {/* Dark gradient overlay for text */}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-700 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}></div>
+
+                    {/* Text Overlay */}
+                    <div className={`absolute bottom-6 left-6 text-white transition-all duration-700 transform ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+                      <h3 className="text-3xl md:text-5xl font-bold mb-1 tracking-tight drop-shadow-md">{item.title}</h3>
+                      <p className="text-sm md:text-lg text-slate-200 drop-shadow-md">{item.subtitle}</p>
                     </div>
                   </div>
+
+                  {/* Discover More Bottom Section */}
+                  <div
+                    onClick={() => {
+                      if (isActive) openModal(item);
+                    }}
+                    className={`absolute -bottom-16 left-0 w-full flex flex-col items-center justify-center text-slate-500 hover:text-primary transition-all duration-700 z-10 ${isActive ? 'opacity-100 translate-y-0 cursor-pointer' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+                  >
+                    <span className="text-xs font-bold tracking-widest uppercase mb-1 text-center">Discover More</span>
+                    <ChevronRight className="w-6 h-6 rotate-90 transition-transform duration-300 hover:translate-y-1" />
+                  </div>
                 </div>
-             );
-           })}
-         </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Article Modal Overlay (Portaled to root for full screen blur) */}
@@ -179,7 +179,7 @@ function ImageCarousel() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsModalOpen(false)}></div>
           <div className="bg-white rounded-[2rem] w-full max-w-3xl max-h-[85vh] overflow-y-auto relative z-10 shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-300">
-            <button 
+            <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors z-20 backdrop-blur-md"
             >
@@ -213,7 +213,7 @@ function ImageCarousel() {
 const PlusPattern = ({ className = "" }: { className?: string }) => (
   <svg className={`absolute pointer-events-none opacity-40 ${className}`} width="168" height="264" fill="none" viewBox="0 0 168 264">
     <pattern id="plus-pattern" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-      <path d="M12 6v12M6 12h12" stroke="#10b981" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M12 6v12M6 12h12" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" />
     </pattern>
     <rect width="100%" height="100%" fill="url(#plus-pattern)" />
   </svg>
@@ -224,7 +224,7 @@ export default function UserDashboard() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [level, setLevel] = useState(1);
   const [levelName, setLevelName] = useState('Pemula');
-  
+
   useEffect(() => {
     async function fetchPoints() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -255,7 +255,7 @@ export default function UserDashboard() {
     <div className="space-y-12 pb-12 font-sans">
       {/* FIRST SCREEN WRAPPER */}
       <div className="relative -mt-8 -mx-8 px-8 md:px-12 pt-32 pb-16 min-h-[calc(100vh-5rem)] flex flex-col justify-between gap-12 overflow-hidden">
-        
+
         {/* Background Image bg1.png */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img src="/bg1.png" alt="Background" className="w-full h-full object-cover object-center" />
@@ -265,19 +265,19 @@ export default function UserDashboard() {
         <div className="flex-1 flex flex-col items-center justify-start text-center relative z-10 space-y-6 w-full max-w-4xl mx-auto pt-8 md:pt-16 pb-20">
           <PopUp delay={0}>
             <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-[#0B2C4A]">
-              Jelajahi Dunia Pengetahuan<br/>
+              Jelajahi Dunia Pengetahuan<br />
               Tanpa Batas <span className="text-primary">Waktu!</span>
             </h1>
           </PopUp>
-          
+
           <PopUp delay={150}>
             <p className="text-slate-800 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
               Tingkatkan pengalaman belajarmu dengan Perpustakaan Digital. Akses ribuan koleksi e-book, jurnal, dan pustaka ilmiah secara instan, di mana saja dan kapan saja.
             </p>
           </PopUp>
-          
+
           <PopUp delay={300}>
-            <div className="mt-4 text-primary font-bold text-xl bg-white/80 backdrop-blur-sm px-8 py-3 rounded-full border border-primary/20 inline-block shadow-sm">
+            <div className="mt-4 text-white font-extrabold text-2xl inline-block drop-shadow-sm">
               #PerpustakaanBisaBanget
             </div>
           </PopUp>
@@ -289,10 +289,10 @@ export default function UserDashboard() {
         {/* Decorative Patterns */}
         <PlusPattern className="-top-10 -left-10 md:left-0 opacity-30" />
         <PlusPattern className="top-32 md:top-48 -right-10 md:right-0 opacity-30" />
-        
+
         <div className="relative px-4 md:px-12 max-w-7xl mx-auto">
           <div className="relative z-10 grid lg:grid-cols-2 gap-10 lg:gap-8">
-            
+
             {/* VISI (Left Column) */}
             <div className="flex flex-col items-center">
               <PopUp delay={0}>
@@ -343,14 +343,18 @@ export default function UserDashboard() {
       {/* SEJARAH SECTION */}
       <section className="bg-gradient-to-r from-teal-500 to-primary w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] py-16 px-4 md:px-12 shadow-lg mt-32 mb-20">
         <PopUp>
-          <h3 className="text-3xl font-extrabold text-white mb-16 text-center drop-shadow-md">Sejarah Perpustakaan</h3>
+          <div className="flex justify-center mb-16 relative group">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white/80 via-white to-white/80 animate-shine text-center tracking-tight [filter:drop-shadow(0_0_15px_rgba(255,255,255,0.8))]">
+              Sejarah Perpustakaan
+            </h2>
+          </div>
         </PopUp>
-        
+
         {/* History Grid */}
         <div className="relative max-w-7xl mx-auto">
           {/* Connecting Dashed Line */}
           <div className="hidden md:block absolute top-[11px] left-[16.6%] right-[16.6%] h-0 border-t-[3px] border-dashed border-white/40 z-0"></div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 relative z-10">
             {/* Item 1 */}
             <PopUp delay={0}>
@@ -423,7 +427,7 @@ export default function UserDashboard() {
           <div className="relative w-full z-10">
             {/* Horizontal connecting line (only on lg+) */}
             <div className="hidden lg:block absolute top-0 left-[12.5%] right-[12.5%] h-[2px] bg-slate-300"></div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-0 lg:pt-8">
               {/* Unit 1 */}
               <PopUp delay={300}>
@@ -444,7 +448,7 @@ export default function UserDashboard() {
                   </div>
                 </div>
               </PopUp>
-              
+
               {/* Unit 2 */}
               <PopUp delay={450}>
                 <div className="relative flex flex-col items-center h-full">
@@ -516,7 +520,7 @@ export default function UserDashboard() {
             <div className="flex items-end justify-center gap-3 sm:gap-5 bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-[2rem] px-6 sm:px-8 py-4 relative mx-auto w-max min-w-min">
               {/* Inner reflection */}
               <div className="absolute inset-0 rounded-[2rem] border border-white pointer-events-none"></div>
-              
+
               {fasilitas.map((fas, idx) => {
                 const Icon = fas.icon;
                 return (
@@ -534,7 +538,7 @@ export default function UserDashboard() {
                     <div className={`w-14 h-14 sm:w-16 sm:h-16 ${fas.bg} border-2 ${fas.borderColor} rounded-[1.2rem] flex items-center justify-center cursor-pointer shadow-sm origin-bottom hover:scale-[1.4] sm:hover:scale-[1.5] hover:mx-3 sm:hover:mx-5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:z-10 transition-all duration-300 ease-out ${fas.hoverBg}`}>
                       <Icon className={`w-7 h-7 sm:w-8 sm:h-8 ${fas.text} group-hover:text-white transition-colors duration-300`} />
                     </div>
-                    
+
                     {/* Active Dot (Mac style) */}
                     <div className="w-1 h-1 bg-slate-300 group-hover:bg-primary rounded-full absolute -bottom-2.5 transition-colors duration-300"></div>
                   </div>
@@ -550,7 +554,7 @@ export default function UserDashboard() {
         <PopUp>
           <h3 className="text-3xl font-extrabold text-[#0B2C4A] mb-10 text-center relative z-10">Galeri Kegiatan</h3>
         </PopUp>
-        
+
         <PopUp delay={150}>
           <ImageCarousel />
         </PopUp>
