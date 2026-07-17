@@ -24,32 +24,164 @@ export default function LoansPage() {
 
   const fetchBorrowings = async (userId: string) => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data: bData, error } = await supabase
       .from('borrowings')
-      .select('*, books(*)')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .select('*')
+      .order('borrow_date', { ascending: false });
+    
+    if (bData) {
+      const sortedByDate = [...bData].sort((a: any, b: any) => new Date(a.borrow_date).getTime() - new Date(b.borrow_date).getTime());
+      const queueCounters: Record<string, number> = {};
 
-    if (data) {
-      setBorrowings(data);
+      const withTokens = sortedByDate.map((b: any) => {
+        const d = new Date(b.borrow_date);
+        const dateStr = d.toLocaleDateString('id-ID');
+        if (!queueCounters[dateStr]) queueCounters[dateStr] = 0;
+        queueCounters[dateStr]++;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = String(d.getFullYear()).slice(-2);
+        const queueNum = String(queueCounters[dateStr]).padStart(3, '0');
+        return {
+          ...b,
+          generated_token: `${day}${month}${year}${queueNum}`
+        };
+      });
+
+      const userBorrowings = withTokens.filter((b: any) => b.user_id === userId);
+      userBorrowings.sort((a: any, b: any) => new Date(b.borrow_date).getTime() - new Date(a.borrow_date).getTime());
+
+      const bookIds = [...new Set(userBorrowings.map((b: any) => b.book_id))].filter(Boolean);
+      const { data: booksData } = await supabase.from('books').select('*').in('id', bookIds);
+      const booksMap: any = {};
+      if (booksData) {
+        booksData.forEach((book: any) => {
+          booksMap[book.id] = book;
+        });
+      }
+      const mergedData = userBorrowings.map((b: any) => ({
+        ...b,
+        books: booksMap[b.book_id] || {}
+      }));
+      setBorrowings(mergedData);
     }
     setLoading(false);
   };
 
+  const handleReturnRequest = async (loanId: number) => {
+    if (!confirm('Ajukan pengembalian buku ini?')) return;
+    try {
+      const { error } = await supabase.from('borrowings')
+        .update({ status: 'Pending_Return' })
+        .eq('id', loanId);
+      if (error) throw error;
+      alert('Pengajuan pengembalian berhasil dikirim.');
+      if (user) fetchBorrowings(user.id);
+    } catch (err: any) {
+      alert('Gagal mengajukan pengembalian: ' + err.message);
+    }
+  };
+
   const getStatusColor = (status: string, dueDate: string) => {
     if (status === 'Returned') return 'bg-green-100 text-green-700 border-green-200';
+    if (status === 'Pending_Borrow') return 'bg-amber-100 text-amber-700 border-amber-200';
+    if (status === 'Pending_Return') return 'bg-purple-100 text-purple-700 border-purple-200';
+    if (status === 'Rejected') return 'bg-gray-100 text-gray-700 border-gray-200';
     if (new Date(dueDate) < new Date()) return 'bg-red-100 text-red-700 border-red-200'; // Overdue
     return 'bg-blue-100 text-blue-700 border-blue-200';
   };
 
   const getStatusText = (status: string, dueDate: string) => {
     if (status === 'Returned') return 'Dikembalikan';
+    if (status === 'Pending_Borrow') return 'Menunggu Approval';
+    if (status === 'Pending_Return') return 'Proses Kembali';
+    if (status === 'Rejected') return 'Ditolak';
     if (new Date(dueDate) < new Date()) return 'Terlambat';
     return 'Dipinjam';
   };
 
+  const pendingBorrowLoans = borrowings.filter(b => b.status === 'Pending_Borrow');
   const activeLoans = borrowings.filter(b => b.status === 'Borrowed');
-  const pastLoans = borrowings.filter(b => b.status === 'Returned');
+  const pendingReturnLoans = borrowings.filter(b => b.status === 'Pending_Return');
+  const pastLoans = borrowings.filter(b => b.status === 'Returned' || b.status === 'Rejected');
+
+  const renderLoanGroup = (title: string, icon: React.ReactNode, loans: any[], isPast = false) => {
+    if (loans.length === 0) return null;
+    return (
+      <div>
+        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          {icon} {title} ({loans.length})
+        </h2>
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isPast ? 'opacity-70 hover:opacity-100 transition-opacity' : ''}`}>
+          {loans.map((loan) => (
+            <div key={loan.id} className={`bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group ${isPast ? 'bg-gray-50 grayscale-[30%]' : ''}`}>
+              <div className="flex gap-4">
+                <div className="w-16 h-24 bg-gray-100 rounded-lg shrink-0 overflow-hidden border border-gray-100">
+                  {loan.books.cover_url ? (
+                    <img src={loan.books.cover_url} alt={loan.books.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-6 h-6 text-gray-300" /></div>
+                  )}
+                </div>
+                <div className="flex-1 flex flex-col">
+                  <h3 className="font-bold text-gray-900 line-clamp-1 mb-1">{loan.books.title}</h3>
+                  <div className="mb-2">
+                    <p className="text-[10px] uppercase text-gray-400 font-bold">Token Antrian</p>
+                    <p className="font-mono font-bold text-gray-700 text-sm">{loan.generated_token || '-'}</p>
+                  </div>
+                  
+                  <div className="mt-auto space-y-1">
+                    <p className="text-xs text-gray-600 flex items-center gap-1.5">
+                      <Calendar className="w-3 h-3 text-gray-400" /> Req: {new Date(loan.borrow_date).toLocaleDateString('id-ID')}
+                    </p>
+                    {(loan.status === 'Borrowed' || loan.status === 'Pending_Return') && (
+                       <p className="text-xs text-gray-600 flex items-center gap-1.5">
+                         <Clock className="w-3 h-3 text-orange-400" /> Tgt: {new Date(loan.due_date).toLocaleDateString('id-ID')}
+                       </p>
+                    )}
+                    {(loan.status === 'Returned' && loan.return_date) && (
+                       <p className="text-xs text-gray-600 flex items-center gap-1.5">
+                         <CheckCircle2 className="w-3 h-3 text-green-400" /> Kmb: {new Date(loan.return_date).toLocaleDateString('id-ID')}
+                       </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md border ${getStatusColor(loan.status, loan.due_date)}`}>
+                  {getStatusText(loan.status, loan.due_date)}
+                </span>
+                
+                <div className="flex items-center gap-2">
+                  {loan.status === 'Borrowed' && (
+                    <button 
+                      onClick={() => handleReturnRequest(loan.id)}
+                      className="flex items-center gap-1 text-[10px] font-bold text-white bg-blue-600 px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Kembalikan
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setBorrowReceipt({
+                      book: loan.books,
+                      loan: loan,
+                      borrowDate: new Date(loan.borrow_date),
+                      dueDate: new Date(loan.due_date),
+                      user: user
+                    })}
+                    className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors"
+                  >
+                    <Ticket className="w-4 h-4" /> Detail
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto relative min-h-screen pb-12">
@@ -82,89 +214,10 @@ export default function LoansPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Active Loans */}
-            {activeLoans.length > 0 && (
-              <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-blue-500" /> Sedang Dipinjam ({activeLoans.length})
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {activeLoans.map((loan) => (
-                    <div key={loan.id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                      <div className="flex gap-4">
-                        <div className="w-16 h-24 bg-gray-100 rounded-lg shrink-0 overflow-hidden border border-gray-100">
-                          {loan.books.cover_url ? (
-                            <img src={loan.books.cover_url} alt={loan.books.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-6 h-6 text-gray-300" /></div>
-                          )}
-                        </div>
-                        <div className="flex-1 flex flex-col">
-                          <h3 className="font-bold text-gray-900 line-clamp-1 mb-1">{loan.books.title}</h3>
-                          <p className="text-xs text-gray-500 mb-3">{loan.books.author || 'Penulis Tidak Diketahui'}</p>
-                          
-                          <div className="mt-auto space-y-1">
-                            <p className="text-xs text-gray-600 flex items-center gap-1.5">
-                              <Calendar className="w-3 h-3 text-gray-400" /> Pinjam: {new Date(loan.created_at).toLocaleDateString('id-ID')}
-                            </p>
-                            <p className="text-xs text-gray-600 flex items-center gap-1.5">
-                              <Clock className="w-3 h-3 text-orange-400" /> Tenggat: {new Date(loan.due_date).toLocaleDateString('id-ID')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md border ${getStatusColor(loan.status, loan.due_date)}`}>
-                          {getStatusText(loan.status, loan.due_date)}
-                        </span>
-                        
-                        <button 
-                          onClick={() => setBorrowReceipt({
-                            book: loan.books,
-                            borrowDate: new Date(loan.created_at),
-                            dueDate: new Date(loan.due_date),
-                            user: user
-                          })}
-                          className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors"
-                        >
-                          <Ticket className="w-4 h-4" /> Lihat Nota
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Past Loans */}
-            {pastLoans.length > 0 && (
-              <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-500" /> Riwayat Pengembalian ({pastLoans.length})
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-70 hover:opacity-100 transition-opacity">
-                  {pastLoans.map((loan) => (
-                    <div key={loan.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 shadow-sm flex gap-4 grayscale-[30%]">
-                      <div className="w-12 h-16 bg-gray-200 rounded-md shrink-0 overflow-hidden border border-gray-200">
-                        {loan.books.cover_url ? (
-                          <img src={loan.books.cover_url} alt={loan.books.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center"><BookOpen className="w-4 h-4 text-gray-400" /></div>
-                        )}
-                      </div>
-                      <div className="flex-1 flex flex-col justify-center">
-                        <h3 className="font-semibold text-sm text-gray-800 line-clamp-1 mb-0.5">{loan.books.title}</h3>
-                        <p className="text-[10px] text-gray-500 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                           <span>Pinjam: {new Date(loan.created_at).toLocaleDateString('id-ID')}</span>
-                           {loan.return_date && <span>Kembali: {new Date(loan.return_date).toLocaleDateString('id-ID')}</span>}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {renderLoanGroup("Menunggu Persetujuan Pinjam", <Clock className="w-5 h-5 text-amber-500" />, pendingBorrowLoans)}
+            {renderLoanGroup("Sedang Dipinjam", <BookOpen className="w-5 h-5 text-blue-500" />, activeLoans)}
+            {renderLoanGroup("Menunggu Konfirmasi Kembali", <History className="w-5 h-5 text-purple-500" />, pendingReturnLoans)}
+            {renderLoanGroup("Selesai (Riwayat)", <CheckCircle2 className="w-5 h-5 text-green-500" />, pastLoans, true)}
           </div>
         )}
       </div>
@@ -192,10 +245,9 @@ export default function LoansPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Tgl Pinjam</p>
-                    <div className="flex items-center gap-2 text-gray-800 font-semibold">
-                      <Calendar className="w-4 h-4 text-blue-500" />
-                      {borrowReceipt.borrowDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Token Pinjaman</p>
+                    <div className="flex items-center gap-2 text-gray-800 font-semibold font-mono">
+                      {borrowReceipt.loan?.token || '-'}
                     </div>
                   </div>
                   <div>
@@ -210,6 +262,47 @@ export default function LoansPage() {
                     <div className="flex items-center gap-2 text-gray-800 font-semibold">
                       <User className="w-4 h-4 text-green-500" />
                       {borrowReceipt.user.email}
+                    </div>
+                  </div>
+
+                  <div className="col-span-2 mt-4 pt-4 border-t border-gray-100">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-3">Tracing Aktivitas</p>
+                    <div className="relative border-l-2 border-gray-100 ml-2 space-y-4 pb-2">
+                      
+                      {/* Req Pinjam */}
+                      <div className="relative pl-4">
+                        <div className="absolute w-3 h-3 bg-blue-500 rounded-full -left-[7px] top-1.5 ring-4 ring-white"></div>
+                        <p className="text-xs font-bold text-gray-900">Pengajuan Peminjaman</p>
+                        <p className="text-[10px] text-gray-500">{new Date(borrowReceipt.borrowDate).toLocaleString('id-ID')}</p>
+                      </div>
+
+                      {/* Approved */}
+                      {borrowReceipt.loan?.approved_at && (
+                        <div className="relative pl-4">
+                          <div className="absolute w-3 h-3 bg-blue-500 rounded-full -left-[7px] top-1.5 ring-4 ring-white"></div>
+                          <p className="text-xs font-bold text-gray-900">Disetujui Admin</p>
+                          <p className="text-[10px] text-gray-500">{new Date(borrowReceipt.loan.approved_at).toLocaleString('id-ID')}</p>
+                        </div>
+                      )}
+
+                      {/* Return Req */}
+                      {borrowReceipt.loan?.return_request_at && (
+                        <div className="relative pl-4">
+                          <div className="absolute w-3 h-3 bg-purple-500 rounded-full -left-[7px] top-1.5 ring-4 ring-white"></div>
+                          <p className="text-xs font-bold text-gray-900">Pengajuan Kembali</p>
+                          <p className="text-[10px] text-gray-500">{new Date(borrowReceipt.loan.return_request_at).toLocaleString('id-ID')}</p>
+                        </div>
+                      )}
+
+                      {/* Returned */}
+                      {borrowReceipt.loan?.return_date && (
+                        <div className="relative pl-4">
+                          <div className="absolute w-3 h-3 bg-green-500 rounded-full -left-[7px] top-1.5 ring-4 ring-white"></div>
+                          <p className="text-xs font-bold text-gray-900">Selesai & Buku Dikembalikan</p>
+                          <p className="text-[10px] text-gray-500">{new Date(borrowReceipt.loan.return_date).toLocaleString('id-ID')}</p>
+                        </div>
+                      )}
+
                     </div>
                   </div>
                 </div>

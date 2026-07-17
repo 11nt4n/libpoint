@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import { Loader2 } from 'lucide-react';
+import { getEncryptedProfile } from '@/app/actions/profiles';
 
 export default function DashboardLayout({
   children,
@@ -27,7 +28,6 @@ export default function DashboardLayout({
 
       setUser(session.user);
 
-      const { getEncryptedProfile } = await import('@/app/actions/profiles');
       const { data: profileData } = await getEncryptedProfile(session.user.id);
         
       setProfile(profileData);

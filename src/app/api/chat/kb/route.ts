@@ -55,6 +55,14 @@ export async function POST(req: Request) {
       text = await file.text();
     }
 
+    // 0. Cek Digital Signature
+    const pdfString = buffer.toString('binary');
+    const hasSignature = pdfString.includes('ByteRange') && (pdfString.includes('adbe.pkcs7') || pdfString.includes('ETSI.CAdES'));
+    
+    if (!hasSignature) {
+      return NextResponse.json({ success: false, error: 'Dokumen ditolak: Tidak ditemukan Digital Signature pada file PDF.' }, { status: 400 });
+    }
+
     // 1. Upload file to Supabase Storage
     const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const { data: storageData, error: storageError } = await supabase.storage

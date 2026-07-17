@@ -10,7 +10,9 @@ const ollama = createOpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    console.log("RECEIVED BODY:", JSON.stringify(body, null, 2));
+    const { messages } = body;
 
     // 1. Dapatkan pesan terakhir dari user sebagai query pencarian
     const lastMessage = messages[messages.length - 1];

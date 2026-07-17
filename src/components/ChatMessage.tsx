@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, User } from 'lucide-react';
+import { User } from 'lucide-react';
+import Image from 'next/image';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant' | 'system' | 'data';
@@ -17,8 +18,8 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
       <div className={`flex max-w-[85%] sm:max-w-[75%] gap-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar for Assistant only (ChatGPT style) */}
         {!isUser && (
-          <div className="flex-shrink-0 h-8 w-8 rounded-full border border-gray-200 flex items-center justify-center bg-white">
-            <Bot className="text-gray-900 h-5 w-5" />
+          <div className="flex-shrink-0 h-8 w-8 rounded-full border border-gray-200 flex items-center justify-center bg-white overflow-hidden shadow-sm">
+            <Image src="/2.png" alt="AI" width={32} height={32} className="object-cover" />
           </div>
         )}
         

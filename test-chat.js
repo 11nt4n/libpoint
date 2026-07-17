@@ -1,8 +1,20 @@
-fetch('http://127.0.0.1:3000/api/chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ messages: [{ role: 'user', content: 'apa itu machine learning' }] })
-}).then(async (r) => {
-  console.log("Status:", r.status);
-  console.log("Body:", await r.text());
-}).catch(console.error);
+async function test() {
+  try {
+    const res = await fetch('http://localhost:3000/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'user', parts: [{ type: 'text', text: 'Halo' }] }
+        ]
+      })
+    });
+    console.log('Status:', res.status);
+    console.log('Headers:', res.headers);
+    const text = await res.text();
+    console.log('Body:', text);
+  } catch (e) {
+    console.error(e);
+  }
+}
+test();

@@ -16,12 +16,18 @@ export function encrypt(text: string): string {
   }
 
   try {
+    // TEMPORARILY DISABLED: Bypass encryption to prevent "value too long for type varchar(100)" 
+    // error in Supabase database without requiring manual SQL schema migration.
+    // To re-enable encryption, you must alter the profiles table column types to TEXT first.
+    return text;
+    /*
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(keyHex, 'hex'), iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     const authTag = cipher.getAuthTag().toString('hex');
     return `${iv.toString('hex')}:${authTag}:${encrypted}`;
+    */
   } catch (e) {
     console.error('Encryption failed', e);
     return text;

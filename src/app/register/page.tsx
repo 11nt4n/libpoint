@@ -32,6 +32,13 @@ export default function RegisterPage() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            nama_lengkap: formData.nama_lengkap,
+            npm: formData.npm,
+            role: 'user'
+          }
+        }
       });
 
       if (authError) {
@@ -42,21 +49,16 @@ export default function RegisterPage() {
       if (authData.user) {
         const { createEncryptedProfile } = await import('@/app/actions/profiles');
         
-        // 2. Insert into profiles table via server action to encrypt PII
-        const { error: profileError } = await createEncryptedProfile({
+        await createEncryptedProfile({
           id: authData.user.id,
-          user_id: formData.npm, // Using NPM as user_id for simplicity as in old app
+          user_id: formData.npm,
           nama_lengkap: formData.nama_lengkap,
-          npm: formData.npm,
+          nama_panggilan: null,
           email: formData.email,
-          role: 'user',
-          total_points: 0
+          npm: formData.npm,
+          program_studi: null,
+          role: 'user'
         });
-
-        if (profileError) {
-          setError('Berhasil mendaftar akun, tetapi gagal menyimpan profil: ' + profileError);
-          return;
-        }
 
         setSuccess(true);
         setTimeout(() => {

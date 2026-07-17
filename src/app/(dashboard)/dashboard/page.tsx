@@ -254,7 +254,7 @@ export default function UserDashboard() {
   return (
     <div className="space-y-12 pb-12 font-sans">
       {/* FIRST SCREEN WRAPPER */}
-      <div className="relative -mt-4 sm:-mt-8 -mx-4 sm:-mx-8 px-8 md:px-12 pt-32 pb-16 min-h-[calc(100vh-5rem)] flex flex-col justify-between gap-12 overflow-hidden">
+      <div className="relative -mt-4 sm:-mt-8 -mx-4 sm:-mx-8 px-8 md:px-12 pt-20 md:pt-24 pb-12 min-h-[calc(100vh-5rem)] flex flex-col justify-start gap-8 overflow-hidden">
 
         {/* Background Image bg1.png */}
         <div className="absolute inset-0 z-0 pointer-events-none">
@@ -262,21 +262,25 @@ export default function UserDashboard() {
         </div>
 
         {/* HEADER BANNER SECTION */}
-        <div className="flex-1 flex flex-col items-center justify-start text-center relative z-10 space-y-6 w-full max-w-4xl mx-auto pt-8 md:pt-16 pb-20">
+        <div className="flex-1 flex flex-col items-center justify-start text-center relative z-10 space-y-4 md:space-y-6 w-full max-w-4xl mx-auto pt-0 md:pt-4 pb-10">
           <PopUp delay={0}>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-[#0B2C4A]">
-              Jelajahi Dunia Pengetahuan<br />
-              Tanpa Batas <span className="text-primary">Waktu!</span>
+            <div className="flex justify-center w-full mb-1 md:mb-2">
+              <img src="/3.png" alt="LibPoint Mascot" className="h-24 md:h-32 w-auto object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500" />
+            </div>
+          </PopUp>
+          <PopUp delay={100}>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-[#0B2C4A]">
+              Selamat Datang di <span className="text-primary">LibPoint!</span>
             </h1>
           </PopUp>
 
-          <PopUp delay={150}>
+          <PopUp delay={200}>
             <p className="text-slate-800 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
               Tingkatkan pengalaman belajarmu dengan Perpustakaan Digital. Akses ribuan koleksi e-book, jurnal, dan pustaka ilmiah secara instan, di mana saja dan kapan saja.
             </p>
           </PopUp>
 
-          <PopUp delay={300}>
+          <PopUp delay={350}>
             <div className="mt-4 text-white font-extrabold text-2xl inline-block drop-shadow-sm">
               #PerpustakaanBisaBanget
             </div>

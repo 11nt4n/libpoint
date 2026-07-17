@@ -52,7 +52,6 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const adminFeatures: Menu[] = [
     { name: 'Data Buku', href: '/admin/books', icon: Book },
-    { name: 'Peminjaman', href: '/admin/loans', icon: CheckSquare },
     { name: 'Anggota', href: '/admin/members', icon: Users },
     { name: 'Manajemen Poin', href: '/admin/points', icon: Trophy },
     { name: 'Pengumuman', href: '/admin/announcements', icon: Bell },
@@ -63,7 +62,7 @@ export default function Sidebar({ role }: SidebarProps) {
   const userMenus: Menu[] = [
     { name: 'Dashboard', href: role === 'admin' ? '/admin' : '/dashboard', icon: LayoutDashboard },
     { 
-      name: 'Sirkulasi Buku', 
+      name: 'LibCircu', 
       href: '/dashboard/books', 
       icon: Book,
       submenu: [
@@ -73,9 +72,8 @@ export default function Sidebar({ role }: SidebarProps) {
       ]
     },
     { name: 'Peminjaman Saya', href: '/dashboard/loans', icon: History },
-    { name: 'Poin & Aktivitas', href: '/dashboard/points', icon: Trophy },
-    { name: 'LibMerch (Tukar Poin)', href: '/dashboard/rewards', icon: ShoppingBag },
-    { name: 'Teman & Komunitas', href: '/dashboard/community', icon: Users },
+    { name: 'LibLog', href: '/dashboard/points', icon: Trophy },
+    { name: 'LibMerch', href: '/dashboard/rewards', icon: ShoppingBag },
     { name: 'AI Assistant', href: '/dashboard/chat', icon: MessageSquare },
   ];
 

@@ -179,7 +179,7 @@ export default function AdminBooksPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#0B2C4A]">Sirkulasi Buku</h1>
+          <h1 className="text-2xl font-bold text-[#0B2C4A]">Katalog Buku</h1>
           <p className="text-gray-500 mt-1">Kelola data buku yang tersedia di perpustakaan.</p>
         </div>
       </div>

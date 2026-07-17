@@ -10,7 +10,7 @@ export async function createEncryptedProfile(data: any) {
     npm: encrypt(data.npm),
   };
 
-  const { data: result, error } = await supabase.from('profiles').insert(encryptedData).select().single();
+  const { data: result, error } = await supabase.from('profiles').upsert(encryptedData).select().single();
   
   if (error) return { error: error.message };
   
@@ -24,7 +24,9 @@ export async function createEncryptedProfile(data: any) {
 }
 
 export async function getEncryptedProfile(userId: string) {
+  console.log("[DEBUG] Fetching profile for userId:", userId);
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+  console.log("[DEBUG] Profile fetch result:", data, error);
   
   if (error || !data) return { error: error?.message || 'Profile not found' };
   
@@ -51,7 +53,7 @@ export async function getAllEncryptedProfiles() {
   };
 }
 
-export async function addPointsByNpm(npm: string, points: number) {
+export async function addPointsByNpm(npm: string, points: number, activityName?: string) {
   const profilesResult = await getAllEncryptedProfiles();
   if (profilesResult.error) return { error: profilesResult.error };
   
@@ -65,6 +67,18 @@ export async function addPointsByNpm(npm: string, points: number) {
     .eq('id', user.id); // Safe because ID is not encrypted
     
   if (updateError) return { error: updateError.message };
+  
+  if (activityName) {
+    const { error: insertError } = await supabase.from('point_history').insert({
+      user_id: user.id,
+      activity: activityName,
+      points: points
+    });
+    if (insertError) {
+      console.error("Failed to insert point history:", insertError);
+      // We still return success for the profile update, but log the history error
+    }
+  }
   
   return {
     data: {

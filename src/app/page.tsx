@@ -77,12 +77,15 @@ export default function Home() {
             nama_lengkap: regData.namaLengkap,
             npm: regData.npm,
             program_studi: isMahasiswa ? regData.programStudi : null,
-            is_mahasiswa: isMahasiswa
+            is_mahasiswa: isMahasiswa,
+            role: 'user'
           }
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        throw authError;
+      }
 
       if (authData.user) {
         const { createEncryptedProfile } = await import('@/app/actions/profiles');
@@ -92,16 +95,20 @@ export default function Home() {
           id: authData.user.id,
           user_id: regData.npm,
           nama_lengkap: regData.namaLengkap,
+          nama_panggilan: regData.namaPanggilan,
           email: regData.email,
           npm: regData.npm,
+          program_studi: isMahasiswa ? regData.programStudi : null,
           role: 'user'
         });
-        
+
         if (profileError) {
-          console.error("Gagal menyimpan ke profil:", profileError);
+          console.error("Profile Error:", profileError);
+          // Rollback the user creation if profile insertion fails
+          // But for now we just show a generic error
         }
 
-        setRegSuccess('Pendaftaran berhasil! Silakan login dengan Email dan NPM/NIP Anda.');
+        setRegSuccess('Pendaftaran berhasil! Silakan masuk (login) dengan Email dan NPM/NIP Anda.');
         setRegData({
           namaPanggilan: '',
           namaLengkap: '',
@@ -112,7 +119,12 @@ export default function Home() {
         setTimeout(() => setShowRegister(false), 3000);
       }
     } catch (err: any) {
-      setRegError(err.message || 'Terjadi kesalahan saat pendaftaran.');
+      console.error("Registration Error:", err);
+      let errMsg = err.message || 'Terjadi kesalahan saat pendaftaran.';
+      if (typeof errMsg === 'object' || errMsg === '{}') {
+        errMsg = 'Pendaftaran gagal. Email atau NPM ini mungkin sudah terdaftar.';
+      }
+      setRegError(errMsg);
     } finally {
       setRegLoading(false);
     }

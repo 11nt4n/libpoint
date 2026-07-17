@@ -18,8 +18,8 @@ export default function AdminPointsPage() {
     { id: '5', action: 'Layanan cek kemiripan dokumen', point: 5, unit: 'Dokumen' },
     { id: '6', action: 'Layanan bimbingan pemustaka', point: 5, unit: 'Kali' },
     { id: '7', action: 'Menghadiri acara perpustakaan', point: 2, unit: 'Kehadiran' },
-    { id: '8', action: 'Mengirimkan artikel untuk website', point: 10, unit: 'Artikel' },
-    { id: '9', action: 'Membuat konten video pendek (Reels)', point: 20, unit: 'Video' },
+    { id: '8', action: 'Mengirimkan artikel website', point: 10, unit: 'Artikel' },
+    { id: '9', action: 'Membuat konten video pendek', point: 20, unit: 'Video' },
   ];
 
   const selectedRule = pointRules.find(r => r.id === selectedActivity);
@@ -33,8 +33,7 @@ export default function AdminPointsPage() {
 
     try {
       const { addPointsByNpm } = await import('@/app/actions/profiles');
-      
-      const { data: user, error: userError } = await addPointsByNpm(npm, selectedRule.point);
+      const { data: user, error: userError } = await addPointsByNpm(npm, selectedRule.point, selectedRule.action);
 
       if (userError || !user) {
         throw new Error(userError || 'Mahasiswa dengan NPM tersebut tidak ditemukan.');

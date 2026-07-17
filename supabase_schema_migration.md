@@ -38,16 +38,21 @@ CREATE TABLE profiles (
 Buka menu **SQL Editor** di *dashboard* Supabase Anda, dan jalankan perintah seperti ini:
 
 ```sql
-CREATE TYPE user_role AS ENUM ('admin', 'user');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+        CREATE TYPE user_role AS ENUM ('admin', 'user');
+    END IF;
+END$$;
 
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id SERIAL PRIMARY KEY,
   user_id VARCHAR(50) NOT NULL,
   nama_lengkap VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL,
   npm VARCHAR(50) NOT NULL,
   role user_role DEFAULT 'user',
-  total_points INT DEFAULT 0,
+  total_points FLOAT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -62,7 +67,7 @@ Karena ada lebih dari 20 file lain yang masih menggunakan fungsi `mysqli_*` (sep
 Gunakan skema ini untuk membuat tabel `books` di Supabase Anda, sesuai dengan 6 kolom yang kita ekstrak dari data ekspor Senayan (SLiMS).
 
 ```sql
-CREATE TABLE books (
+CREATE TABLE IF NOT EXISTS books (
   id SERIAL PRIMARY KEY,
   item_code VARCHAR(100) UNIQUE NOT NULL,
   title TEXT NOT NULL,
@@ -121,4 +126,14 @@ CREATE TABLE IF NOT EXISTS knowledge_bases (
 
 -- Jangan lupa untuk membuat Storage Bucket baru bernama "knowledge_base" di menu Storage Supabase Anda,
 -- dan atur agar bucket tersebut Public jika ingin PDF bisa diakses langsung melalui URL.
+
+-- 10. Tabel Point History (Riwayat Poin)
+CREATE TABLE IF NOT EXISTS point_history (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  activity VARCHAR(255) NOT NULL,
+  points FLOAT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 ```

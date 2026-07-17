@@ -1,6 +1,6 @@
 'use client';
 
-import { Award, Info, History, Star, ArrowRight, User, Sparkles, TrendingUp, ChevronRight, Gift, X, ChevronLeft, Calendar } from 'lucide-react';
+import { Award, Info, History, Star, ArrowRight, User, Sparkles, TrendingUp, ChevronRight, Gift, X, ChevronLeft, Calendar, BookOpen, MessageSquare, Video, Users, FileText, CheckCircle, Package, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { createPortal } from 'react-dom';
@@ -12,6 +12,7 @@ export default function PointsPage() {
   const [identityText, setIdentityText] = useState('');
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [pointsHistory, setPointsHistory] = useState<any[]>([]);
 
   // Modal & Pagination State
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -19,6 +20,9 @@ export default function PointsPage() {
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
   const ITEMS_PER_PAGE = 5;
+
+  const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
+  const [activeLevelInfo, setActiveLevelInfo] = useState<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -40,6 +44,23 @@ export default function PointsPage() {
           } else if (data.nip) {
             setIdentityText(`NonMahasiswa - ${data.nip}`);
           }
+        }
+
+        // Fetch point_history
+        const { data: historyData } = await supabase
+          .from('point_history')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false });
+
+        if (historyData) {
+          const mappedHistory = historyData.map(item => ({
+            id: item.id,
+            date: new Date(item.created_at).toISOString().split('T')[0],
+            action: item.activity,
+            point: '+' + item.points
+          }));
+          setPointsHistory(mappedHistory);
         }
       }
       setLoading(false);
@@ -68,31 +89,18 @@ export default function PointsPage() {
   const displayProgressPercent = totalPoints >= 1000 ? 100 : (totalPoints / nextLevelPoints) * 100;
 
   const pointRules = [
-    { no: 1, action: 'Mengunjungi perpustakaan dan melakukan presensi kunjungan', point: 1, unit: 'Kunjungan' },
-    { no: 2, action: 'Memberikan komentar terhadap buku pada OPAC / MoLib', point: 1, unit: 'Komentar' },
-    { no: 3, action: 'Peminjaman buku fisik/MoLib', point: 1.5, unit: 'Eksemplar' },
-    { no: 4, action: 'Pengembalian buku fisik tepat waktu (tidak terlambat)', point: 1.5, unit: 'Eksemplar' },
-    { no: 5, action: 'Menggunakan layanan cek kemiripan dokumen (plagiarism check)', point: 5, unit: 'Dokumen' },
-    { no: 6, action: 'Menggunakan layanan bimbingan pemustaka', point: 5, unit: 'Kali' },
-    { no: 7, action: 'Menghadiri acara perpustakaan (workshop, seminar, dll)', point: 2, unit: 'Kehadiran' },
-    { no: 8, action: 'Mengirimkan artikel untuk website perpustakaan', point: 10, unit: 'Artikel' },
-    { no: 9, action: 'Membuat konten video pendek untuk reels instagram perpustakaan', point: 20, unit: 'Video' },
+    { no: 1, action: 'Kunjungan Perpustakaan', desc: 'Melakukan presensi kedatangan di perpustakaan', point: 1, unit: 'Kunjungan', icon: User, color: 'bg-blue-100 text-blue-600', border: 'hover:border-blue-300', glow: 'group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]' },
+    { no: 2, action: 'Komentar Buku', desc: 'Memberikan komentar / ulasan pada OPAC', point: 1, unit: 'Komentar', icon: MessageSquare, color: 'bg-indigo-100 text-indigo-600', border: 'hover:border-indigo-300', glow: 'group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]' },
+    { no: 3, action: 'Peminjaman Buku', desc: 'Meminjam buku fisik atau e-book MoLib', point: 1.5, unit: 'Eksemplar', icon: BookOpen, color: 'bg-emerald-100 text-emerald-600', border: 'hover:border-emerald-300', glow: 'group-hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]' },
+    { no: 4, action: 'Pengembalian Tepat', desc: 'Mengembalikan buku tanpa terlambat', point: 1.5, unit: 'Eksemplar', icon: CheckCircle, color: 'bg-teal-100 text-teal-600', border: 'hover:border-teal-300', glow: 'group-hover:shadow-[0_0_15px_rgba(20,184,166,0.3)]' },
+    { no: 5, action: 'Cek Plagiarisme', desc: 'Menggunakan layanan cek kemiripan', point: 5, unit: 'Dokumen', icon: FileText, color: 'bg-purple-100 text-purple-600', border: 'hover:border-purple-300', glow: 'group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]' },
+    { no: 6, action: 'Bimbingan Pemustaka', desc: 'Konsultasi referensi ke pustakawan', point: 5, unit: 'Kali', icon: Users, color: 'bg-pink-100 text-pink-600', border: 'hover:border-pink-300', glow: 'group-hover:shadow-[0_0_15px_rgba(236,72,153,0.3)]' },
+    { no: 7, action: 'Hadir Acara Perpus', desc: 'Mengikuti workshop, seminar, literasi', point: 2, unit: 'Kehadiran', icon: Calendar, color: 'bg-orange-100 text-orange-600', border: 'hover:border-orange-300', glow: 'group-hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]' },
+    { no: 8, action: 'Kontributor Web', desc: 'Mengirimkan artikel ke web perpustakaan', point: 10, unit: 'Artikel', icon: Sparkles, color: 'bg-amber-100 text-amber-600', border: 'hover:border-amber-300', glow: 'group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]' },
+    { no: 9, action: 'Kreator Konten', desc: 'Membuat video reels/tiktok perpus', point: 20, unit: 'Video', icon: Video, color: 'bg-red-100 text-red-600', border: 'hover:border-red-300', glow: 'group-hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]' },
   ];
 
-  const dummyHistory = [
-    { id: 1, date: '2026-07-05', action: 'Mengunjungi perpustakaan', point: '+1' },
-    { id: 2, date: '2026-07-03', action: 'Peminjaman buku fisik (2 Eksemplar)', point: '+3' },
-    { id: 3, date: '2026-07-01', action: 'Menghadiri acara perpustakaan (Seminar)', point: '+2' },
-    { id: 4, date: '2026-06-28', action: 'Menggunakan layanan plagiarism check', point: '+5' },
-    { id: 5, date: '2026-06-25', action: 'Pengembalian buku tepat waktu', point: '+1.5' },
-    { id: 6, date: '2026-06-20', action: 'Memberikan komentar pada OPAC', point: '+1' },
-    { id: 7, date: '2026-06-15', action: 'Mengunjungi perpustakaan', point: '+1' },
-    { id: 8, date: '2026-06-10', action: 'Peminjaman buku fisik (1 Eksemplar)', point: '+1.5' },
-    { id: 9, date: '2026-06-05', action: 'Menghadiri acara perpustakaan (Workshop)', point: '+2' },
-    { id: 10, date: '2026-06-01', action: 'Membuat konten reels', point: '+20' },
-  ];
-
-  const filteredHistory = dummyHistory.filter(item => {
+  const filteredHistory = pointsHistory.filter(item => {
     if (startDateFilter && item.date < startDateFilter) return false;
     if (endDateFilter && item.date > endDateFilter) return false;
     return true;
@@ -107,12 +115,7 @@ export default function PointsPage() {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-[#0B2C4A] tracking-tight">Poin & Aktivitas</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Kumpulkan poin dari aktivitasmu dan capai level tertinggi!</p>
-        </div>
-      </div>
+
 
       {/* Main Profile & Level Card */}
       <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500">
@@ -197,39 +200,77 @@ export default function PointsPage() {
           
           <div className="p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center relative overflow-hidden group hover:border-amber-300 hover:shadow-lg transition-all">
+              <div 
+                className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center relative overflow-hidden group hover:border-amber-300 hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
+                onClick={() => setActiveLevelInfo(activeLevelInfo === 1 ? null : 1)}
+              >
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-50/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-slate-100 group-hover:border-amber-400 group-hover:scale-110 transition-all">
                   <span className="text-xl font-black text-slate-400">1</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">Kenalan</h3>
+                <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-amber-600 transition-colors">Kenalan</h3>
                 <p className="text-sm text-slate-500 mb-4 font-medium">Tanpa minimal poin</p>
                 <div className="bg-white py-2 px-4 rounded-xl border border-slate-200 inline-block shadow-sm">
                   <span className="font-bold text-slate-700">&lt; 500 XP</span>
                 </div>
+                {/* Level Details Popover */}
+                <div className={`mt-4 text-left overflow-hidden transition-all duration-300 ${activeLevelInfo === 1 ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-600">
+                    <p className="font-bold mb-1 text-slate-800">Benefit:</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>Akses dasar peminjaman</li>
+                      <li>Kapasitas pinjam standar</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               
-              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center relative overflow-hidden group hover:border-amber-400 hover:shadow-lg transition-all">
+              <div 
+                className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center relative overflow-hidden group hover:border-amber-400 hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
+                onClick={() => setActiveLevelInfo(activeLevelInfo === 2 ? null : 2)}
+              >
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-amber-300 group-hover:border-amber-500 group-hover:scale-110 transition-all">
                   <span className="text-xl font-black text-amber-500">2</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">Teman</h3>
+                <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-amber-600 transition-colors">Teman</h3>
                 <p className="text-sm text-slate-500 mb-4 font-medium">Minimal 500 poin</p>
                 <div className="bg-white py-2 px-4 rounded-xl border border-slate-200 inline-block shadow-sm">
                   <span className="font-bold text-slate-700">500 - 999 XP</span>
                 </div>
+                <div className={`mt-4 text-left overflow-hidden transition-all duration-300 ${activeLevelInfo === 2 ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="p-3 bg-amber-50/50 rounded-lg border border-amber-100 text-xs text-slate-600">
+                    <p className="font-bold mb-1 text-amber-800">Benefit Tambahan:</p>
+                    <ul className="list-disc pl-4 space-y-1 text-amber-900/70">
+                      <li>Batas pinjam buku +1</li>
+                      <li>Prioritas request buku</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               
-              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center relative overflow-hidden group hover:border-amber-500 hover:shadow-lg transition-all">
+              <div 
+                className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center relative overflow-hidden group hover:border-amber-500 hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
+                onClick={() => setActiveLevelInfo(activeLevelInfo === 3 ? null : 3)}
+              >
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-200/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md border-2 border-white group-hover:scale-110 transition-all">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md border-2 border-white group-hover:scale-110 transition-all shadow-amber-500/30">
                   <span className="text-xl font-black text-white">3</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">Sahabat</h3>
+                <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">Sahabat</h3>
                 <p className="text-sm text-slate-500 mb-4 font-medium">Minimal 1.000 poin</p>
                 <div className="bg-white py-2 px-4 rounded-xl border border-amber-200 inline-block shadow-sm">
                   <span className="font-bold text-amber-600">≥ 1.000 XP</span>
+                </div>
+                <div className={`mt-4 text-left overflow-hidden transition-all duration-300 ${activeLevelInfo === 3 ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 text-xs text-orange-800">
+                    <p className="font-bold mb-1">Benefit Eksklusif:</p>
+                    <ul className="list-disc pl-4 space-y-1 opacity-80">
+                      <li>Batas pinjam buku +3</li>
+                      <li>Perpanjang pinjaman 2x</li>
+                      <li>Akses merchandise khusus</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -249,31 +290,37 @@ export default function PointsPage() {
             </div>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50 text-slate-500 text-sm">
-                  <th className="py-4 px-6 md:px-8 font-bold w-16 text-center">No</th>
-                  <th className="py-4 px-6 md:px-8 font-bold">Aktivitas</th>
-                  <th className="py-4 px-6 md:px-8 font-bold text-center w-24">Poin</th>
-                  <th className="py-4 px-6 md:px-8 font-bold w-32">Satuan</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100/80 text-sm text-slate-700">
-                {pointRules.map((rule) => (
-                  <tr key={rule.no} className="hover:bg-primary/5 transition-colors group">
-                    <td className="py-4 px-6 md:px-8 text-center text-slate-400 font-semibold">{rule.no}</td>
-                    <td className="py-4 px-6 md:px-8 font-medium group-hover:text-primary transition-colors">{rule.action}</td>
-                    <td className="py-4 px-6 md:px-8 text-center">
-                      <span className="inline-flex items-center justify-center bg-emerald-50 text-emerald-600 font-bold px-3 py-1 rounded-lg">
-                        +{rule.point}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 md:px-8 text-slate-500 font-medium">{rule.unit}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-6 md:p-8 bg-slate-50/50">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pointRules.map((rule) => {
+                const Icon = rule.icon;
+                return (
+                  <div 
+                    key={rule.no} 
+                    className={`bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all duration-300 hover:-translate-y-1.5 ${rule.border} group relative ${rule.glow}`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 ${rule.color}`}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className="text-sm font-bold text-slate-800 leading-snug">{rule.action}</h3>
+                        </div>
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">{rule.desc}</p>
+                        
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 px-2 py-1 rounded-md">/ {rule.unit}</span>
+                          <span className="inline-flex items-center justify-center bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-black text-xs px-2.5 py-1 rounded-lg shadow-sm shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
+                            +{rule.point} XP
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
         
@@ -283,9 +330,12 @@ export default function PointsPage() {
             <h3 className="text-2xl font-bold">Tukar Poinmu!</h3>
             <p className="text-slate-300 max-w-sm">Tukarkan poin yang telah kamu kumpulkan dengan berbagai merchandise eksklusif perpustakaan.</p>
           </div>
-          <button className="relative z-10 bg-primary hover:bg-teal-400 text-white font-bold py-3 px-6 rounded-xl shadow-[0_0_20px_rgba(31,144,144,0.4)] hover:shadow-[0_0_30px_rgba(31,144,144,0.6)] transition-all hover:-translate-y-1 flex items-center gap-2">
-            Katalog Hadiah
-            <ArrowRight className="w-5 h-5" />
+          <button 
+            onClick={() => setIsCatalogModalOpen(true)}
+            className="relative z-10 bg-primary hover:bg-teal-400 text-white font-bold py-3 px-6 rounded-xl shadow-[0_0_20px_rgba(31,144,144,0.4)] hover:shadow-[0_0_30px_rgba(31,144,144,0.6)] transition-all hover:-translate-y-1 flex items-center gap-2 group-hover:scale-105"
+          >
+            Buka Katalog Hadiah
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
@@ -385,6 +435,94 @@ export default function PointsPage() {
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Catalog Modal */}
+      {mounted && isCatalogModalOpen && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsCatalogModalOpen(false)}></div>
+          <div className="bg-slate-50 rounded-[2rem] w-full max-w-4xl shadow-2xl relative z-10 flex flex-col animate-in fade-in zoom-in-95 duration-300 overflow-hidden h-[85vh]">
+            {/* Modal Header */}
+            <div className="p-6 md:p-8 border-b border-slate-200 bg-white relative">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <Gift className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-800">Katalog Penukaran Poin</h3>
+                    <p className="text-sm text-slate-500 font-medium mt-1">Tukarkan poin XP Anda dengan reward menarik</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsCatalogModalOpen(false)}
+                  className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="absolute top-8 right-20 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl shadow-sm flex items-center gap-2">
+                <Star className="w-4 h-4 text-emerald-500 fill-current" />
+                <span className="font-black text-emerald-700">{totalPoints.toLocaleString('id-ID')} XP</span>
+              </div>
+            </div>
+            
+            {/* Modal Body: Product Grid */}
+            <div className="p-6 md:p-8 overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {[
+                  { id: 1, name: 'Voucher Kopi Kantin', desc: 'Gratis 1 gelas Es Kopi Susu', points: 250, img: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&q=80', stock: 15 },
+                  { id: 2, name: 'Tote Bag Perpus', desc: 'Tote bag kanvas premium', points: 500, img: 'https://images.unsplash.com/photo-1597484661643-2f5fef640dd1?auto=format&fit=crop&w=400&q=80', stock: 5 },
+                  { id: 3, name: 'Tumbler Eksklusif', desc: 'Botol minum insulasi panas/dingin', points: 800, img: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=400&q=80', stock: 2 },
+                  { id: 4, name: 'Buku Catatan Premium', desc: 'Notes spiral 100 lembar + pulpen', points: 300, img: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=400&q=80', stock: 20 },
+                  { id: 5, name: 'Kaos "Bookworm"', desc: 'Kaos katun distro ukuran M/L/XL', points: 1200, img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=400&q=80', stock: 0 },
+                  { id: 6, name: 'Lanyard Kartu Mahasiswa', desc: 'Tali ID card official design baru', points: 150, img: 'https://images.unsplash.com/photo-1627473770146-24ab339832c3?auto=format&fit=crop&w=400&q=80', stock: 45 },
+                ].map((item) => (
+                  <div key={item.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all group flex flex-col">
+                    <div className="h-40 w-full overflow-hidden relative bg-slate-100">
+                      <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      {item.stock === 0 && (
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                          <span className="bg-red-500 text-white font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider">Habis</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h4 className="font-bold text-slate-800 text-base mb-1 leading-tight">{item.name}</h4>
+                      <p className="text-xs text-slate-500 mb-4">{item.desc}</p>
+                      
+                      <div className="mt-auto flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Harga:</span>
+                          <span className="font-black text-primary text-sm">{item.points} XP</span>
+                        </div>
+                        <button 
+                          disabled={item.stock === 0 || totalPoints < item.points}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                            item.stock === 0 
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                              : totalPoints < item.points
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                                : 'bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20 hover:-translate-y-0.5'
+                          }`}
+                          onClick={() => {
+                            if (confirm(`Apakah Anda yakin ingin menukar ${item.points} XP untuk ${item.name}?`)) {
+                              alert('Permintaan penukaran berhasil dikirim! Silakan ambil hadiah Anda di meja sirkulasi.');
+                              setIsCatalogModalOpen(false);
+                            }
+                          }}
+                        >
+                          Tukar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
